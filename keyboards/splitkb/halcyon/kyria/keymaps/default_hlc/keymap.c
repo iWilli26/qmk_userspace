@@ -32,53 +32,50 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT  MT(MOD_LALT, KC_ENT)
 
-// Note: LAlt/Enter (ALT_ENT) is not the same thing as the keyboard shortcut Alt+Enter.
-// The notation `mod/tap` denotes a key that activates the modifier `mod` when held down, and
-// produces the key `tap` when tapped (i.e. pressed and released).
 bool process_detected_host_os_kb(os_variant_t detected_os) {
     if (!process_detected_host_os_user(detected_os)) {
         return false;
     }
     switch (detected_os) {
+        case OS_MACOS:
+        case OS_IOS:
+          #define REDO S(G(KC_Z))
+          #define UNDO G(KC_Z)
+          #define CUT G(KC_X)
+          #define COPY G(KC_C)
+          #define PASTE G(KC_V)
+          #define SLCTALL G(KC_A)
+          #define SAVE G(KC_S)
+          #define PREV_W A(KC_LEFT)
+          #define NEXT_W A(KC_RGHT)
+          #define OS_CTL KC_LGUI
+          #define OS_GUI KC_LCTL
+          break;
         case OS_WINDOWS:
         case OS_LINUX:
         case OS_UNSURE:
-          #define REDO C(KC_Y)
-          #define UNDO C(KC_Z)
-          #define CUT C(KC_X)
-          #define COPY C(KC_C)
-          #define PASTE C(KC_V)
-          #define SLCTALL C(KC_A)
-          #define SAVE C(KC_S)
-          #define PREV_W C(KC_LEFT)
-          #define NEXT_W C(KC_RGHT)
-          #define OS_CTL KC_LCTL
-          #define OS_GUI KC_LGUI 
-          break;
-        case OS_MACOS:
-        case OS_IOS:
           #undef REDO
-          #define REDO S(G(KC_Z))
+          #define REDO C(KC_Y)
           #undef UNDO
-          #define UNDO G(KC_Z)
+          #define UNDO C(KC_Z)
           #undef CUT
-          #define CUT G(KC_X)
+          #define CUT C(KC_X)
           #undef COPY
-          #define COPY G(KC_C)
+          #define COPY C(KC_C)
           #undef PASTE
-          #define PASTE G(KC_V)
+          #define PASTE C(KC_V)
           #undef SLCTALL
-          #define SLCTALL G(KC_A)
+          #define SLCTALL C(KC_A)
           #undef SAVE
-          #define SAVE G(KC_S)     
+          #define SAVE C(KC_S)
           #undef PREV_W
-          #define PREV_W A(KC_LEFT)
+          #define PREV_W C(KC_LEFT)
           #undef NEXT_W
-          #define NEXT_W A(KC_RGHT)
+          #define NEXT_W C(KC_RGHT)
           #undef OS_CTL
-          #define OS_CTL KC_LGUI
+          #define OS_CTL KC_LCTL
           #undef OS_GUI
-          #define OS_GUI KC_LCTL       
+          #define OS_GUI KC_LGUI
           break;
     }
     
