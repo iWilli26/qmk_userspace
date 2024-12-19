@@ -62,8 +62,8 @@ bool process_detected_host_os_kb(os_variant_t detected_os) {
           #define NEXT_W C(KC_RGHT)
           #define OS_CTL KC_LCTL
           #define OS_GUI KC_LGUI
-          break;
           return true;
+          break;
         case OS_MACOS:
         case OS_IOS:
           #undef REDO
@@ -88,8 +88,8 @@ bool process_detected_host_os_kb(os_variant_t detected_os) {
           #define NEXT_W A(KC_RGHT)
           #define OS_CTL KC_LGUI
           #define OS_GUI KC_LCTL
-          break;
           return true;
+          break;
         
     }
   }
