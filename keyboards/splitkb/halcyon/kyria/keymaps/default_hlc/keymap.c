@@ -32,6 +32,8 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT  MT(MOD_LALT, KC_ENT)
 
+os_variant_t detected_host_os(void);
+
 bool process_detected_host_os_kb(os_variant_t detected_os) {
     if (!process_detected_host_os_user(detected_os)) {
         return false;
