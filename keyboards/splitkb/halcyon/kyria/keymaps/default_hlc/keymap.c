@@ -5,13 +5,19 @@
 #include <keycodes.h>
 #include <stdbool.h>
 
+// Define RGB color values
+#define RGB_BLUE 0, 0, 255
+#define RGB_ORANGE 255, 165, 0
+#define RGB_RED 255, 0, 0
+#define RGB_WHITE 255, 255, 255
+
 enum layers {
     _COLEMAK_DH = 0,
     _SYM,
     _NAV,
+    _SELECT,
     _FUNCTION,
     _ADJUST,
-    _SELECT,
     _DVORAK,
 };
 
@@ -33,7 +39,28 @@ enum layers {
 // Note: LAlt/Enter (ALT_ENT) is not the same thing as the keyboard shortcut Alt+Enter.
 // The notation `mod/tap` denotes a key that activates the modifier `mod` when held down, and
 // produces the key `tap` when tapped (i.e. pressed and released).
-
+bool process_detected_host_os_kb(os_variant_t detected_os) {
+    if (!process_detected_host_os_user(detected_os)) {
+        return false;
+    }
+    switch (detected_os) {
+        case OS_MACOS:
+        case OS_IOS:
+            rgb_matrix_set_color_all(RGB_WHITE); // RGB_WHITE
+            break;
+        case OS_WINDOWS:
+            rgb_matrix_set_color_all(RGB_BLUE);
+            break;
+        case OS_LINUX:
+            rgb_matrix_set_color_all(RGB_ORANGE);
+            break;
+        case OS_UNSURE:
+            rgb_matrix_set_color_all(RGB_RED);
+            break;
+    }
+    
+    return true;
+}
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
@@ -57,9 +84,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
     [_COLEMAK_DH] = LAYOUT_split_3x6_5_hlc(
     KC_ESCAPE, KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                    KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_SCLN, KC_BSPC,
-     KC_LSFT , KC_A ,  KC_R   ,  KC_S   ,   KC_T ,   KC_G ,                                                                    KC_M  ,   KC_N ,   KC_E ,   KC_I ,  KC_O , CTL_QUOT,
-     KC_LCTL , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , KC_LBRC,KC_CAPS,                             FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
+     KC_LSFT , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   SFT_T(KC_T) ,   KC_G ,                                              KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , CTL_QUOT,
+     KC_LCTL , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , CW_TOGG, KC_CAPS,                             FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
                                  AC_TOGG, KC_LGUI, ALT_ENT, LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB)   ,  KC_ENT    , LT(_SYM, KC_BSPC) ,KC_RALT , KC_RGUI, KC_APP,
+
          KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
     ), 
 
@@ -79,10 +107,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                            ----------------------------------  ----------------------------------
  */
     [_NAV] = LAYOUT_split_3x6_5_hlc(
-      _______, _______, _______, _______, _______, _______,                                     KC_PGUP, MS_WHLU, MS_UP,   MS_WHLD,  KC_VOLU, KC_DEL,
-      _______, KC_LGUI, KC_LALT, KC_LCTL, KC_LSFT, _______,                                     KC_PGDN, MS_LEFT, MS_DOWN, MS_RGHT, KC_VOLD, KC_INS,
+      _______, _______, PREV_W, KC_UP, NEXT_W , _______,                                     KC_PGUP, MS_WHLU, MS_UP,   MS_WHLD,  KC_VOLU, KC_DEL,
+      _______, _______, KC_LEFT, KC_DOWN, KC_RIGHT, _______,                                     KC_PGDN, MS_LEFT, MS_DOWN, MS_RGHT, KC_VOLD, KC_INS,
       _______, _______, _______, _______, _______, _______, _______, KC_SCRL, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_PSCR,
                                  _______, _______, _______, _______, _______, MS_BTN3, MS_BTN1, MS_BTN2, _______, _______,
+
         KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
 
 
@@ -107,9 +136,20 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      KC_LSFT , KC_EXLM ,  KC_AT     , KC_QUOT,  KC_GRV    , KC_SCLN,                                     KC_CIRC,    KC_4,    KC_5,    KC_6, KC_SLSH, KC_ENT,
      KC_NUBS , KC_AMPR , KC_PERC    , KC_QUES, KC_EXLM   , KC_BSLS, _______ , _______, _______, _______, KC_0,       KC_1,    KC_2,    KC_3, KC_DOT, KC_QUES,
                                        _______, _______, KC_LBRC, KC_SPC , KC_RBRC, _______, _______, _______, _______, _______,
+
                                             KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
 
     ),
+
+        [_SELECT] = LAYOUT_split_3x6_5_hlc(
+     KC_TAB  , COPY ,      S(KC_LEFT)  ,   S(KC_UP)      ,   S(KC_RIGHT)    , SLCTALL   ,                                       KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC,
+     CTL_ESC , PASTE ,  C(S(KC_LEFT))   ,  S(KC_DOWN)     ,   C(S(KC_RIGHT)) , UNDO   ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
+     KC_LSFT , CUT ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , KC_LBRC,KC_CAPS  , REDO  ,                         KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
+                                ADJUST , KC_LGUI, ALT_ENT, KC_SPC , NAV     , SYM    ,                               KC_SPC ,KC_RALT, KC_RGUI, KC_APP,
+
+                                     KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
+
+    ), 
 
 /*
  * Function Layer: Function keys
@@ -130,19 +170,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       _______,  KC_F5 ,  KC_F6 ,  KC_F7 ,  KC_F8 , _______,                                     _______, KC_RSFT, KC_RCTL, KC_LALT, KC_RGUI, _______,
       _______,  KC_F1 ,  KC_F2 ,  KC_F3 ,  KC_F4 , _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
                                  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
+
                                       KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
 
     ),
 
 
-    [_SELECT] = LAYOUT_split_3x6_5_hlc(
-     KC_TAB  , KC_Q ,      S(KC_LEFT)  ,   S(KC_UP)      ,   S(KC_RIGHT)    , KC_W   ,                                       KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC,
-     CTL_ESC , KC_A ,  C(S(KC_LEFT))   ,  S(KC_DOWN)     ,   C(S(KC_RIGHT)) , KC_G   ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
-     KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , KC_LBRC,KC_CAPS  , FKEYS  ,                         KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
-                                ADJUST , KC_LGUI, ALT_ENT, KC_SPC , NAV     , SYM    ,                               KC_SPC ,KC_RALT, KC_RGUI, KC_APP,
-                                     KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
 
-    ), 
 
 /*
  * Base Layer: Dvorak
@@ -163,7 +197,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      CTL_ESC , KC_A ,  KC_O   ,  KC_E  ,   KC_U ,   KC_I ,                                        KC_D,   KC_H ,  KC_T ,   KC_N ,  KC_S , CTL_MINS,
      KC_LSFT ,KC_SCLN, KC_Q   ,  KC_J  ,   KC_K ,   KC_X , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC, KC_B,   KC_M ,  KC_W ,   KC_V ,  KC_Z , KC_RSFT,
                                  ADJUST, KC_LGUI, ALT_ENT, KC_SPC , NAV   ,     SYM    , KC_SPC ,KC_RALT, KC_RGUI, KC_APP,
-                                      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
+
+                                      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,     KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
 
     ),
 
@@ -189,7 +224,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       _______, _______, _______, DVORAK , _______, _______,                                    RM_TOGG, RM_SATU, RM_HUEU, RM_VALU, RM_NEXT, _______,
       _______, _______, _______, COLEMAK, _______, _______,_______, _______, _______, _______, _______, RM_SATD, RM_HUED, RM_VALD, RM_PREV, _______,
                                  _______, _______, _______,_______, _______, _______, _______, _______, _______, _______,
-                                      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
+
+        KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
 
     ),
 
