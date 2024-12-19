@@ -38,20 +38,6 @@ bool process_detected_host_os_kb(os_variant_t detected_os) {
         return false;
     }
     switch (detected_os) {
-        case OS_MACOS:
-        case OS_IOS:
-          #define REDO S(G(KC_Z))
-          #define UNDO G(KC_Z)
-          #define CUT G(KC_X)
-          #define COPY G(KC_C)
-          #define PASTE G(KC_V)
-          #define SLCTALL G(KC_A)
-          #define SAVE G(KC_S)     
-          #define PREV_W A(KC_LEFT)
-          #define NEXT_W A(KC_RGHT)
-          #define OS_CTL KC_LGUI
-          #define OS_GUI KC_LCTL       
-          break;
         case OS_WINDOWS:
         case OS_LINUX:
         case OS_UNSURE:
@@ -66,7 +52,33 @@ bool process_detected_host_os_kb(os_variant_t detected_os) {
           #define NEXT_W C(KC_RGHT)
           #define OS_CTL KC_LCTL
           #define OS_GUI KC_LGUI 
-            break;
+          break;
+        case OS_MACOS:
+        case OS_IOS:
+          #undef REDO
+          #define REDO S(G(KC_Z))
+          #undef UNDO
+          #define UNDO G(KC_Z)
+          #undef CUT
+          #define CUT G(KC_X)
+          #undef COPY
+          #define COPY G(KC_C)
+          #undef PASTE
+          #define PASTE G(KC_V)
+          #undef SLCTALL
+          #define SLCTALL G(KC_A)
+          #undef SAVE
+          #define SAVE G(KC_S)     
+          #undef PREV_W
+          #define PREV_W A(KC_LEFT)
+          #undef NEXT_W
+          #define NEXT_W A(KC_RGHT)
+          #undef OS_CTL
+          #define OS_CTL KC_LGUI
+          #undef OS_GUI
+          #define OS_GUI KC_LCTL       
+          break;
+
     }
     
     return true;
