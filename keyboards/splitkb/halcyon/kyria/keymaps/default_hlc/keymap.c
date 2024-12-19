@@ -33,7 +33,7 @@ enum layers {
 #define ALT_ENT  MT(MOD_LALT, KC_ENT)
 
 
-bool process_detected_host_os_kb() {
+bool process_detected_host_os_kb(os_variant_t a) {
     os_variant_t detected_os = detected_host_os();
 
     if (!process_detected_host_os_user(detected_os)) {
