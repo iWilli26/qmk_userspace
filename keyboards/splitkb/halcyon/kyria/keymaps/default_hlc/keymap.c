@@ -4,6 +4,8 @@
 #include QMK_KEYBOARD_H
 #include <keycodes.h>
 #include <stdbool.h>
+#include "os_detection.h"
+#include "quantum.h"
 
 enum layers {
     _COLEMAK_DH = 0,
