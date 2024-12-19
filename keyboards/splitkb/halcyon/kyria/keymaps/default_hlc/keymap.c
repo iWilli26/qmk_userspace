@@ -37,8 +37,46 @@ bool process_detected_host_os_kb(os_variant_t detected_os) {
         return false;
     }
     switch (detected_os) {
+      case OS_WINDOWS:
+        case OS_LINUX:
+        case OS_UNSURE:
+          #undef REDO
+          #undef UNDO
+          #undef CUT
+          #undef COPY
+          #undef PASTE
+          #undef SLCTALL
+          #undef SAVE
+          #undef PREV_W
+          #undef NEXT_W
+          #undef OS_CTL
+          #undef OS_GUI
+          #define REDO C(KC_Y)
+          #define UNDO C(KC_Z)
+          #define CUT C(KC_X)
+          #define COPY C(KC_C)
+          #define PASTE C(KC_V)
+          #define SLCTALL C(KC_A)
+          #define SAVE C(KC_S)
+          #define PREV_W C(KC_LEFT)
+          #define NEXT_W C(KC_RGHT)
+          #define OS_CTL KC_LCTL
+          #define OS_GUI KC_LGUI
+          break;
+          return true;
         case OS_MACOS:
         case OS_IOS:
+          #undef REDO
+          #undef UNDO
+          #undef CUT
+          #undef COPY
+          #undef PASTE
+          #undef SLCTALL
+          #undef SAVE
+          #undef PREV_W
+          #undef NEXT_W
+          #undef OS_CTL
+          #undef OS_GUI
           #define REDO S(G(KC_Z))
           #define UNDO G(KC_Z)
           #define CUT G(KC_X)
@@ -51,36 +89,10 @@ bool process_detected_host_os_kb(os_variant_t detected_os) {
           #define OS_CTL KC_LGUI
           #define OS_GUI KC_LCTL
           break;
-        case OS_WINDOWS:
-        case OS_LINUX:
-        case OS_UNSURE:
-          #undef REDO
-          #define REDO C(KC_Y)
-          #undef UNDO
-          #define UNDO C(KC_Z)
-          #undef CUT
-          #define CUT C(KC_X)
-          #undef COPY
-          #define COPY C(KC_C)
-          #undef PASTE
-          #define PASTE C(KC_V)
-          #undef SLCTALL
-          #define SLCTALL C(KC_A)
-          #undef SAVE
-          #define SAVE C(KC_S)
-          #undef PREV_W
-          #define PREV_W C(KC_LEFT)
-          #undef NEXT_W
-          #define NEXT_W C(KC_RGHT)
-          #undef OS_CTL
-          #define OS_CTL KC_LCTL
-          #undef OS_GUI
-          #define OS_GUI KC_LGUI
-          break;
+          return true;
+        
     }
-    
-    return true;
-}
+  }
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
