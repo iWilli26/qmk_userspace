@@ -95,13 +95,16 @@ enum layers {
 //     return true;
 //   }
 
-if (host_get_os() == OS_MACOS) {
-        #define COPY G(KC_C)
-} else if (host_get_os() == OS_WINDOWS) {
-          #define COPY C(KC_C)
+set_copy_key(void) {
+  if (host_get_os() == OS_MACOS) {
+    #define COPY G(KC_C)
+  } else if (host_get_os() == OS_WINDOWS) {
+    #define COPY C(KC_C)
+  }
+}
 
-    // Windows-specific behavior
-} 
+// Call the function to set the COPY key
+set_copy_key();
 
 
 // clang-format off
@@ -291,3 +294,4 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 //     ),
 //
 };
+
