@@ -80,7 +80,6 @@ bool process_detected_host_os_kb(os_variant_t detected_os) {
           #undef OS_GUI
           #define OS_GUI KC_LCTL       
           break;
-
     }
     
     return true;
