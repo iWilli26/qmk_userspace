@@ -5,12 +5,6 @@
 #include <keycodes.h>
 #include <stdbool.h>
 
-// Define RGB color values
-#define RGB_BLUE 0, 0, 255
-#define RGB_ORANGE 255, 165, 0
-#define RGB_RED 255, 0, 0
-#define RGB_WHITE 255, 255, 255
-
 enum layers {
     _COLEMAK_DH = 0,
     _SYM,
