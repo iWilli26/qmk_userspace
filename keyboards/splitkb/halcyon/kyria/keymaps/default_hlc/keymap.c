@@ -40,16 +40,32 @@ bool process_detected_host_os_kb(os_variant_t detected_os) {
     switch (detected_os) {
         case OS_MACOS:
         case OS_IOS:
-            rgb_matrix_set_color_all(RGB_WHITE); // RGB_WHITE
-            break;
+          #define REDO S(G(KC_Z))
+          #define UNDO G(KC_Z)
+          #define CUT G(KC_X)
+          #define COPY G(KC_C)
+          #define PASTE G(KC_V)
+          #define SLCTALL G(KC_A)
+          #define SAVE G(KC_S)     
+          #define PREV_W A(KC_LEFT)
+          #define NEXT_W A(KC_RGHT)
+          #define OS_CTL KC_LGUI
+          #define OS_GUI KC_LCTL       
+          break;
         case OS_WINDOWS:
-            rgb_matrix_set_color_all(RGB_BLUE);
-            break;
         case OS_LINUX:
-            rgb_matrix_set_color_all(RGB_ORANGE);
-            break;
         case OS_UNSURE:
-            rgb_matrix_set_color_all(RGB_RED);
+          #define REDO C(KC_Y)
+          #define UNDO C(KC_Z)
+          #define CUT C(KC_X)
+          #define COPY C(KC_C)
+          #define PASTE C(KC_V)
+          #define SLCTALL C(KC_A)
+          #define SAVE C(KC_S)
+          #define PREV_W C(KC_LEFT)
+          #define NEXT_W C(KC_RGHT)
+          #define OS_CTL KC_LCTL
+          #define OS_GUI KC_LGUI 
             break;
     }
     
@@ -57,9 +73,6 @@ bool process_detected_host_os_kb(os_variant_t detected_os) {
 }
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-
-
-
 
 
 /*

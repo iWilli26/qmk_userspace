@@ -2,3 +2,5 @@
 USER_NAME := halcyon_modules
 CAPS_WORD_ENABLE = yes
 OS_DETECTION_ENABLE = yes
+
+RGBLIGHT_ENABLE = yes

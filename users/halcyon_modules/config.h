@@ -44,7 +44,7 @@
 #   define HLC_ENCODER_B NO_PIN
 #endif
 
-#define ENABLE_RGB_MATRIX_TYPING_HEATMAP
+#define ENABLE_RGB_MATRIX_TYPING_HEATMAP true
 
 // Kyria
 #if PRODUCT_ID == 0x7FCE
