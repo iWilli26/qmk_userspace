@@ -32,7 +32,7 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT  MT(MOD_LALT, KC_ENT)
 
-os_variant_t detected_host_os(void);
+os_variant_t detected_os = detected_host_os();
 
 bool process_detected_host_os_kb(os_variant_t detected_os) {
     if (!process_detected_host_os_user(detected_os)) {
@@ -93,6 +93,9 @@ bool process_detected_host_os_kb(os_variant_t detected_os) {
       }
     return true;
   }
+
+process_detected_host_os_kb(detected_os);
+
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
