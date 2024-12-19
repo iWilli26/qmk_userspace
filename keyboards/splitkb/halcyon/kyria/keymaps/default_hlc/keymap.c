@@ -94,8 +94,6 @@ bool process_detected_host_os_kb(os_variant_t detected_os) {
     return true;
   }
 
-process_detected_host_os_kb(detected_os);
-
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
