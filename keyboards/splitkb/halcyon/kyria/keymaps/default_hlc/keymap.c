@@ -39,13 +39,13 @@ bool process_detected_host_os_kb(os_variant_t detected_os) {
     return false;
   }
 
-  uprintf("OS Detected: %s\n", detected_os);
+  uprintf("OS Detected: %d\n", detected_os);
 
   // Handle OS-specific key definitions
   switch (detected_os) {
-    case OS_WINDOWS:
-    case OS_LINUX:
-    case OS_UNSURE: // Treat "unsure" as default to Windows/Linux behavior
+    case 2: //Windows
+    case 0: //Unsure
+    case 1: // Linux
       #undef REDO
       #undef UNDO
       #undef CUT
@@ -70,8 +70,8 @@ bool process_detected_host_os_kb(os_variant_t detected_os) {
       #define OS_GUI KC_LGUI
       break;
 
-    case OS_MACOS:
-    case OS_IOS:
+    case 3: //MacOS
+    case 4: //iOS
       #undef REDO
       #undef UNDO
       #undef CUT
@@ -117,7 +117,7 @@ void keyboard_post_init_user(void) {
     if (!process_detected_host_os_kb(os_type)) {
         uprintf("Error: OS detection failed or unsupported OS\n");
     } else {
-        uprintf("OS Detected init: %s\n", os_type);
+        uprintf("OS Detected init: %d\n", os_type);
     }
 }
 
