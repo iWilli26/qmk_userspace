@@ -2,3 +2,4 @@
 USER_NAME := halcyon_modules
 CAPS_WORD_ENABLE = yes
 OS_DETECTION_ENABLE = yes
+CONSOLE_ENABLE = yes
