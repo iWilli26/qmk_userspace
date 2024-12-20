@@ -107,12 +107,15 @@ enum layers {
 // }
 
 void notify_usb_device_state_change_user(uint8_t usb_device_state) {
+    debug_enable=true;
+    debug_matrix=true;
+    debug_keyboard=true;
+    debug_mouse=true;
+    sleep(1000); // Sleep for 1 second to allow time for the USB device to be detected
     uprintf("USB Device State Change: %d\n", usb_device_state);
 
     // Use detected_host_os to identify the operating system
-    os_variant_t os_type = detected_host_os();
-
-    switch (os_type) {
+    switch (detected_host_os()) {
         case OS_MACOS:
             uprintf("Detected macOS\n");
             break;
