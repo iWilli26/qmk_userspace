@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include "os_detection.h"
 #include "quantum.h"
+#include "print.h"
 
 enum layers {
     _COLEMAK_DH = 0,
@@ -37,6 +38,8 @@ bool process_detected_host_os_kb(os_variant_t detected_os) {
     if (!process_detected_host_os_user(detected_os)) {
         return false;
     }
+
+    uprintf("OS Detected: %d\n", detected_os);
 
     // Handle OS-specific key definitions
     switch (detected_os) {
@@ -103,6 +106,11 @@ bool process_detected_host_os_kb(os_variant_t detected_os) {
 
 
 void keyboard_post_init_user(void) {
+    debug_enable=true;
+    debug_matrix=true;
+    debug_keyboard=true;
+    debug_mouse=true;
+
     os_variant_t os_type = detected_host_os();
 
     // Set up key mappings based on detected OS
