@@ -106,7 +106,7 @@ enum layers {
 //   return true;
 // }
 
-void notify_usb_device_state_change_user(usb_device_state_t usb_device_state) {
+void notify_usb_device_state_change_user(uint8_t usb_device_state) {
     uprintf("USB Device State Change: %d\n", usb_device_state);
 
     // Use detected_host_os to identify the operating system
