@@ -7,7 +7,8 @@
 #include <unistd.h>  // For sleep function
 #include "os_detection.h"
 #include "quantum.h"
-#include "usb_device_state.h" // Include the correct header file for usb_device_state
+#include "usb_device_state.h"
+#include "host.h"
 #include "print.h"
 
 enum layers {
@@ -105,14 +106,15 @@ enum layers {
 //   return true;
 // }
 
-void notify_usb_device_state_change_user(usb_device_state usb_device_state) {
-  //wait 1 second for the OS to recognize the device
-  sleep(1000);
-  uprintf("USB Device State Change\n");
+void notify_usb_device_state_change_user(usb_device_state_t usb_device_state) {
+    uprintf("USB Device State Change: %d\n", usb_device_state);
 
-  switch(detected_host_os()) {
+    // Use detected_host_os to identify the operating system
+    os_variant_t os_type = detected_host_os();
+
+    switch (os_type) {
         case OS_MACOS:
-            uprintf("Detected MacOS\n");
+            uprintf("Detected macOS\n");
             break;
         case OS_WINDOWS:
             uprintf("Detected Windows\n");
@@ -120,7 +122,7 @@ void notify_usb_device_state_change_user(usb_device_state usb_device_state) {
         case OS_LINUX:
             uprintf("Detected Linux\n");
             break;
-        case default:
+        default:
             uprintf("Detected Unknown OS\n");
             break;
     }
@@ -132,7 +134,6 @@ void keyboard_post_init_user(void) {
     debug_keyboard=true;
     debug_mouse=true;
     uprintf("Keyboard Initialized\n");
-    os_variant_t os_type = detected_host_os();
     switch(detected_host_os()) {
         case OS_MACOS:
             uprintf("Detected MacOS\n");
