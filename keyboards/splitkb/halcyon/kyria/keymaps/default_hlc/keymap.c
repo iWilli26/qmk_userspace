@@ -52,16 +52,29 @@ enum {
     TD_MAC_WIN,
 };
 
+// bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+//     switch (keycode) {
+//     case QMKBEST:
+//         if (record->event.pressed) {
+//             // when keycode QMKBEST is pressed
+//             SEND_STRING("QMK is the best thing ever!");
+//         } else {
+//             // when keycode QMKBEST is released
+//         }
+//         break;
+//     }
+//     return true;
+// };
+
 // Tap Dance definitions
 tap_dance_action_t tap_dance_actions[] = {
-    // Tap once for Escape, twice for Caps Lock
     [TD_MAC_WIN] = ACTION_TAP_DANCE_DOUBLE(CG_LNRM, CG_LSWP),
 };
 
-const uint16_t PROGMEM test_combo1[] = {CTL_T(KC_E), CTL_T(KC_S), COMBO_END};
-combo_t key_combos[] = {
-    COMBO(test_combo1, MACRO_É),
-};
+// const uint16_t PROGMEM test_combo1[] = {CTL_T(KC_E), CTL_T(KC_S), COMBO_END};
+// combo_t key_combos[] = {
+//     COMBO(test_combo1, OUTPUT_HERE),
+// };
 
 
 // clang-format off
