@@ -144,7 +144,7 @@ void keyboard_post_init_user(void) {
         case OS_LINUX:
             uprintf("Detected Linux\n");
             break;
-        case default:
+        default:
             uprintf("Detected Unknown OS\n");
             break;
     }
