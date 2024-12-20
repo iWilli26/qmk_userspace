@@ -36,123 +36,32 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT  MT(MOD_LALT, KC_ENT)
 
-// bool process_detected_host_os_kb(os_variant_t detected_os) {
-//   // Call user-defined process function; allow custom overrides
-//   if (!process_detected_host_os_user(detected_os)) {
-//     return false;
-//   }
+#define REDO C(KC_Y)
+#define UNDO C(KC_Z)
+#define CUT C(KC_X)
+#define COPY C(KC_C)
+#define PASTE C(KC_V)
+#define SLCTALL C(KC_A)
+#define SAVE C(KC_S)
+#define PREV_W C(KC_LEFT)
+#define NEXT_W C(KC_RGHT)
+#define OS_CTL KC_LCTL
+#define OS_GUI KC_LGUI
 
-//   uprintf("OS Detected: %d\n", detected_os);
+enum {
+    TD_MAC_WIN,
+};
 
-//   // Handle OS-specific key definitions
-//   switch (detected_os) {
-//     case 2: //Windows
-//     case 0: //Unsure
-//     case 1: // Linux
-      #undef REDO
-      #undef UNDO
-      #undef CUT
-      #undef COPY
-      #undef PASTE
-      #undef SLCTALL
-      #undef SAVE
-      #undef PREV_W
-      #undef NEXT_W
-      #undef OS_CTL
-      #undef OS_GUI
-      #define REDO C(KC_Y)
-      #define UNDO C(KC_Z)
-      #define CUT C(KC_X)
-      #define COPY C(KC_C)
-      #define PASTE C(KC_V)
-      #define SLCTALL C(KC_A)
-      #define SAVE C(KC_S)
-      #define PREV_W C(KC_LEFT)
-      #define NEXT_W C(KC_RGHT)
-      #define OS_CTL KC_LCTL
-      #define OS_GUI KC_LGUI
-//       break;
+// Tap Dance definitions
+tap_dance_action_t tap_dance_actions[] = {
+    // Tap once for Escape, twice for Caps Lock
+    [TD_MAC_WIN] = ACTION_TAP_DANCE_DOUBLE(CG_LNRM, CG_LSWP),
+};
 
-//     case 3: //MacOS
-//     case 4: //iOS
-//       #undef REDO
-//       #undef UNDO
-//       #undef CUT
-//       #undef COPY
-//       #undef PASTE
-//       #undef SLCTALL
-//       #undef SAVE
-//       #undef PREV_W
-//       #undef NEXT_W
-//       #undef OS_CTL
-//       #undef OS_GUI
-//       #define REDO S(G(KC_Z))  // Shift + Command + Z
-//       #define UNDO G(KC_Z)     // Command + Z
-//       #define CUT G(KC_X)      // Command + X
-//       #define COPY G(KC_C)     // Command + C
-//       #define PASTE G(KC_V)    // Command + V
-//       #define SLCTALL G(KC_A)  // Command + A
-//       #define SAVE G(KC_S)     // Command + S
-//       #define PREV_W A(KC_LEFT) // Option + Left
-//       #define NEXT_W A(KC_RGHT) // Option + Right
-//       #define OS_CTL KC_LGUI    // Control remapped to Command
-//       #define OS_GUI KC_LCTL    // GUI remapped to Control
-//       break;
-
-//     default:
-//       return false; // Invalid OS variant, gracefully exit
-//   }
-
-//   return true;
-// }
-
-void notify_usb_device_state_change_user(uint8_t usb_device_state) {
-    debug_enable=true;
-    debug_matrix=true;
-    debug_keyboard=true;
-    debug_mouse=true;
-    uprintf("USB Device State Change: %d\n", usb_device_state);
-
-    // Use detected_host_os to identify the operating system
-    switch (detected_host_os()) {
-        case OS_MACOS:
-            uprintf("Detected macOS\n");
-            break;
-        case OS_WINDOWS:
-            uprintf("Detected Windows\n");
-            break;
-        case OS_LINUX:
-            uprintf("Detected Linux\n");
-            break;
-        default:
-            uprintf("Detected Unknown OS\n");
-            break;
-    }
-}
-
-void keyboard_post_init_user(void) {
-    debug_enable=true;
-    debug_matrix=true;
-    debug_keyboard=true;
-    debug_mouse=true;
-    uprintf("Keyboard Initialized\n");
-    switch(detected_host_os()) {
-        case OS_MACOS:
-            uprintf("Detected MacOS\n");
-            break;
-        case OS_WINDOWS:
-            uprintf("Detected Windows\n");
-            break;
-        case OS_LINUX:
-            uprintf("Detected Linux\n");
-            break;
-        default:
-            uprintf("Detected Unknown OS\n");
-            break;
-    }
-    
-    
-}
+const uint16_t PROGMEM test_combo1[] = {CTL_T(KC_E), CTL_T(KC_S), COMBO_END};
+combo_t key_combos[] = {
+    COMBO(test_combo1, MACRO_É),
+};
 
 
 // clang-format off
@@ -169,15 +78,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |--------+------+------+------+------+------+-------------.                                        ,-------------+------+------+------+------+------+--------|
  * |  Ctl   |   Z  |   X  |   C  |   D  |   V  | KC_MINS|CapsLk|                                       |F-keys|  ] } |   K  |   H  | ,  < | . >  | /  ? | RShift |
  * `----------------------+------+------+------+------+------|                                       |------+------+------+------+------+----------------------'
- *                        |Adjust| LGUI | LAlt/| _SELECT| Nav  |                                       | Sym  | SYM  | AltGr| RGUI | Menu |
- *                        |      |      | Enter| Space  | Tab  |                                       |      | BkSpc|      |      |      |
+ *                        |Switch| LGUI | LAlt/| _SELECT| Nav  |                                       | Sym  | SYM  | AltGr| RGUI | Menu |
+ *                        |GUI CTL|      | Enter| Space  | Tab  |                                       |      | BkSpc|      |      |      |
  *                        `----------------------------------'                                       `----------------------------------'
  */
     [_COLEMAK_DH] = LAYOUT_split_3x6_5_hlc(
     KC_ESCAPE, KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                    KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_SCLN, KC_BSPC,
      KC_LSFT , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   SFT_T(KC_T) ,   KC_G ,                                              KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , CTL_QUOT,
      KC_LCTL , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , CW_TOGG, KC_CAPS,                             FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
-                                 AC_TOGG, KC_LGUI, ALT_ENT, LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB)   ,  KC_ENT    , LT(_SYM, KC_BSPC) ,KC_RALT , KC_RGUI, KC_APP,
+                                     TD(TD_MAC_WIN), KC_LGUI, ALT_ENT, LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB)   ,  KC_ENT    , LT(_SYM, KC_BSPC) ,KC_RALT , KC_RGUI, KC_APP,
 
          KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
     ), 
