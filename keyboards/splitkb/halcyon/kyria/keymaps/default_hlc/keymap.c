@@ -7,6 +7,7 @@
 #include <unistd.h>  // For sleep function
 #include "os_detection.h"
 #include "quantum.h"
+#include "usb_device_state.h" // Include the correct header file for usb_device_state
 #include "print.h"
 
 enum layers {
@@ -47,28 +48,28 @@ enum layers {
 //     case 2: //Windows
 //     case 0: //Unsure
 //     case 1: // Linux
-//       #undef REDO
-//       #undef UNDO
-//       #undef CUT
-//       #undef COPY
-//       #undef PASTE
-//       #undef SLCTALL
-//       #undef SAVE
-//       #undef PREV_W
-//       #undef NEXT_W
-//       #undef OS_CTL
-//       #undef OS_GUI
-//       #define REDO C(KC_Y)
-//       #define UNDO C(KC_Z)
-//       #define CUT C(KC_X)
-//       #define COPY C(KC_C)
-//       #define PASTE C(KC_V)
-//       #define SLCTALL C(KC_A)
-//       #define SAVE C(KC_S)
-//       #define PREV_W C(KC_LEFT)
-//       #define NEXT_W C(KC_RGHT)
-//       #define OS_CTL KC_LCTL
-//       #define OS_GUI KC_LGUI
+      #undef REDO
+      #undef UNDO
+      #undef CUT
+      #undef COPY
+      #undef PASTE
+      #undef SLCTALL
+      #undef SAVE
+      #undef PREV_W
+      #undef NEXT_W
+      #undef OS_CTL
+      #undef OS_GUI
+      #define REDO C(KC_Y)
+      #define UNDO C(KC_Z)
+      #define CUT C(KC_X)
+      #define COPY C(KC_C)
+      #define PASTE C(KC_V)
+      #define SLCTALL C(KC_A)
+      #define SAVE C(KC_S)
+      #define PREV_W C(KC_LEFT)
+      #define NEXT_W C(KC_RGHT)
+      #define OS_CTL KC_LCTL
+      #define OS_GUI KC_LGUI
 //       break;
 
 //     case 3: //MacOS
