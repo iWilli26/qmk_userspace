@@ -4,6 +4,7 @@
 #include QMK_KEYBOARD_H
 #include <keycodes.h>
 #include <stdbool.h>
+#include <windows.h>  // For Sleep function
 #include "os_detection.h"
 #include "quantum.h"
 #include "print.h"
@@ -103,9 +104,9 @@ enum layers {
 //   return true;
 // }
 
-void notify_usb_device_state_change_user(){
+void notify_usb_device_state_change_user(usb_device_state usb_device_state) {
   //wait 1 second for the OS to recognize the device
-  _delay_ms(1000);
+  Sleep(1000);
   uprintf("USB Device State Change\n");
 
   switch(detected_host_os()) {
@@ -118,7 +119,7 @@ void notify_usb_device_state_change_user(){
         case OS_LINUX:
             uprintf("Detected Linux\n");
             break;
-        case OS_UNKNOWN:
+        case default:
             uprintf("Detected Unknown OS\n");
             break;
     }
@@ -141,7 +142,7 @@ void keyboard_post_init_user(void) {
         case OS_LINUX:
             uprintf("Detected Linux\n");
             break;
-        case OS_UNKNOWN:
+        case default:
             uprintf("Detected Unknown OS\n");
             break;
     }
