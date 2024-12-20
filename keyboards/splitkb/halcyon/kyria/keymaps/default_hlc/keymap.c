@@ -34,73 +34,73 @@ enum layers {
 #define ALT_ENT  MT(MOD_LALT, KC_ENT)
 
 bool process_detected_host_os_kb(os_variant_t detected_os) {
-    // Call user-defined process function; allow custom overrides
-    if (!process_detected_host_os_user(detected_os)) {
-        return false;
-    }
+  // Call user-defined process function; allow custom overrides
+  if (!process_detected_host_os_user(detected_os)) {
+    return false;
+  }
 
-    uprintf("OS Detected: %d\n", detected_os);
+  uprintf("OS Detected: %s\n", detected_os);
 
-    // Handle OS-specific key definitions
-    switch (detected_os) {
-        case OS_WINDOWS:
-        case OS_LINUX:
-        case OS_UNSURE: // Treat "unsure" as default to Windows/Linux behavior
-            #undef REDO
-            #undef UNDO
-            #undef CUT
-            #undef COPY
-            #undef PASTE
-            #undef SLCTALL
-            #undef SAVE
-            #undef PREV_W
-            #undef NEXT_W
-            #undef OS_CTL
-            #undef OS_GUI
-            #define REDO C(KC_Y)
-            #define UNDO C(KC_Z)
-            #define CUT C(KC_X)
-            #define COPY C(KC_C)
-            #define PASTE C(KC_V)
-            #define SLCTALL C(KC_A)
-            #define SAVE C(KC_S)
-            #define PREV_W C(KC_LEFT)
-            #define NEXT_W C(KC_RGHT)
-            #define OS_CTL KC_LCTL
-            #define OS_GUI KC_LGUI
-            break;
+  // Handle OS-specific key definitions
+  switch (detected_os) {
+    case OS_WINDOWS:
+    case OS_LINUX:
+    case OS_UNSURE: // Treat "unsure" as default to Windows/Linux behavior
+      #undef REDO
+      #undef UNDO
+      #undef CUT
+      #undef COPY
+      #undef PASTE
+      #undef SLCTALL
+      #undef SAVE
+      #undef PREV_W
+      #undef NEXT_W
+      #undef OS_CTL
+      #undef OS_GUI
+      #define REDO C(KC_Y)
+      #define UNDO C(KC_Z)
+      #define CUT C(KC_X)
+      #define COPY C(KC_C)
+      #define PASTE C(KC_V)
+      #define SLCTALL C(KC_A)
+      #define SAVE C(KC_S)
+      #define PREV_W C(KC_LEFT)
+      #define NEXT_W C(KC_RGHT)
+      #define OS_CTL KC_LCTL
+      #define OS_GUI KC_LGUI
+      break;
 
-        case OS_MACOS:
-        case OS_IOS:
-            #undef REDO
-            #undef UNDO
-            #undef CUT
-            #undef COPY
-            #undef PASTE
-            #undef SLCTALL
-            #undef SAVE
-            #undef PREV_W
-            #undef NEXT_W
-            #undef OS_CTL
-            #undef OS_GUI
-            #define REDO S(G(KC_Z))  // Shift + Command + Z
-            #define UNDO G(KC_Z)     // Command + Z
-            #define CUT G(KC_X)      // Command + X
-            #define COPY G(KC_C)     // Command + C
-            #define PASTE G(KC_V)    // Command + V
-            #define SLCTALL G(KC_A)  // Command + A
-            #define SAVE G(KC_S)     // Command + S
-            #define PREV_W A(KC_LEFT) // Option + Left
-            #define NEXT_W A(KC_RGHT) // Option + Right
-            #define OS_CTL KC_LGUI    // Control remapped to Command
-            #define OS_GUI KC_LCTL    // GUI remapped to Control
-            break;
+    case OS_MACOS:
+    case OS_IOS:
+      #undef REDO
+      #undef UNDO
+      #undef CUT
+      #undef COPY
+      #undef PASTE
+      #undef SLCTALL
+      #undef SAVE
+      #undef PREV_W
+      #undef NEXT_W
+      #undef OS_CTL
+      #undef OS_GUI
+      #define REDO S(G(KC_Z))  // Shift + Command + Z
+      #define UNDO G(KC_Z)     // Command + Z
+      #define CUT G(KC_X)      // Command + X
+      #define COPY G(KC_C)     // Command + C
+      #define PASTE G(KC_V)    // Command + V
+      #define SLCTALL G(KC_A)  // Command + A
+      #define SAVE G(KC_S)     // Command + S
+      #define PREV_W A(KC_LEFT) // Option + Left
+      #define NEXT_W A(KC_RGHT) // Option + Right
+      #define OS_CTL KC_LGUI    // Control remapped to Command
+      #define OS_GUI KC_LCTL    // GUI remapped to Control
+      break;
 
-        default:
-            return false; // Invalid OS variant, gracefully exit
-    }
+    default:
+      return false; // Invalid OS variant, gracefully exit
+  }
 
-    return true;
+  return true;
 }
 
 
@@ -117,7 +117,7 @@ void keyboard_post_init_user(void) {
     if (!process_detected_host_os_kb(os_type)) {
         uprintf("Error: OS detection failed or unsupported OS\n");
     } else {
-        uprintf("OS Detected: %d\n", os_type);
+        uprintf("OS Detected init: %s\n", os_type);
     }
 }
 
