@@ -8,6 +8,7 @@
 #include "quantum.h"
 #include "host.h"
 #include "print.h"
+#include "keymap_french.h"
 
 enum layers {
     _COLEMAK_DH = 0,
@@ -72,15 +73,15 @@ void process_combo_event(uint16_t combo_index, bool pressed) {
       break;
     case E_GRV:
       if (pressed) {
-        tap_code16(KC_GRV);
-        tap_code16(KC_E);     
+        tap_code16(FR_EGRV);   
         }
       break;
     case E_CIR:
       if (pressed) {
-        SEND_STRING("ê");     
+        tap_code16(KC_AT);
+        tap_code16(KC_E);  
         }
-      break;
+      break;   
   }
 }
 
