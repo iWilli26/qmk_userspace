@@ -98,7 +98,7 @@ void process_combo_event(uint16_t combo_index, bool pressed) {
 
 enum {
     TD_MAC_WIN,
-}
+};
 
 tap_dance_action_t tap_dance_actions[] = {
     [TD_MAC_WIN] = ACTION_TAP_DANCE_DOUBLE(CG_LNRM, CG_LSWP),
