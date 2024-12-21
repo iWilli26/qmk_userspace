@@ -8,7 +8,6 @@
 #include "quantum.h"
 #include "host.h"
 #include "print.h"
-#include "keymap_french.h"
 
 enum layers {
     _COLEMAK_DH = 0,
@@ -67,18 +66,28 @@ void process_combo_event(uint16_t combo_index, bool pressed) {
   switch(combo_index) {
     case E_AIG:
       if (pressed) {
+        const uint8_t mods = get_mods();
+        del_mods(MOD_MASK_SHIFT);
         tap_code16(KC_QUOT);
+        set_mods(mods);
         tap_code16(KC_E);     
         }
       break;
     case E_GRV:
       if (pressed) {
-        tap_code16(FR_EGRV);   
-        }
+        const uint8_t mods = get_mods();
+        del_mods(MOD_MASK_SHIFT);
+        tap_code16(KC_GRV);
+        set_mods(mods);
+        tap_code16(KC_E);    
+      }
       break;
     case E_CIR:
       if (pressed) {
+        const uint8_t mods = get_mods();
+        del_mods(MOD_MASK_SHIFT);
         tap_code16(KC_AT);
+        set_mods(mods);
         tap_code16(KC_E);  
         }
       break;   
