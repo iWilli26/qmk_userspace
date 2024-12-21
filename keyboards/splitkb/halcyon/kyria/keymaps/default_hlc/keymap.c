@@ -7,7 +7,6 @@
 #include <unistd.h>  // For sleep function
 #include "quantum.h"
 #include "action_tapping.h"
-#include "action_tap_dance.h"
 #include "host.h"
 #include "print.h"
 
