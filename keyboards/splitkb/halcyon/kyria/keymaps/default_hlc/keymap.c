@@ -96,16 +96,6 @@ void process_combo_event(uint16_t combo_index, bool pressed) {
   }
 }
 
-uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
-    switch (keycode) {
-        case SFT_T(KC_SPC):
-            return TAPPING_TERM + 1250;
-        case LT(1, KC_GRV):
-            return 130;
-        default:
-     return TAPPING_TERM;
-}
-
 enum {
     TD_MAC_WIN,
 }
