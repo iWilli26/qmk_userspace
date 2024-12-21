@@ -66,8 +66,9 @@ void process_combo_event(uint16_t combo_index, bool pressed) {
   switch(combo_index) {
     case AB_ESC:
       if (pressed) {
-        SEND_STRING("john.doe@example.com");
-      }
+        tap_code16(KC_QUOT);
+        tap_code16(KC_E);     
+        }
       break;
   }
 }
