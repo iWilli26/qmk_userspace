@@ -48,32 +48,37 @@ enum layers {
 #define OS_CTL KC_LCTL
 #define OS_GUI KC_LGUI
 
-enum {
-    TD_MAC_WIN,
+enum combos {
+  AB_ESC,
+  JK_TAB,
+  QW_SFT,
+  SD_LAYER
 };
 
-// bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-//     switch (keycode) {
-//     case QMKBEST:
-//         if (record->event.pressed) {
-//             // when keycode QMKBEST is pressed
-//             SEND_STRING("QMK is the best thing ever!");
-//         } else {
-//             // when keycode QMKBEST is released
-//         }
-//         break;
-//     }
-//     return true;
-// };
+const uint16_t PROGMEM ab_combo[] = {CTL_T(KC_E), CTL_T(KC_S), COMBO_END};
+const uint16_t PROGMEM jk_combo[] = {KC_J, KC_K, COMBO_END};
+const uint16_t PROGMEM qw_combo[] = {KC_Q, KC_W, COMBO_END};
+const uint16_t PROGMEM sd_combo[] = {KC_S, KC_D, COMBO_END};
 
-// Tap Dance definitions
-tap_dance_action_t tap_dance_actions[] = {
-    [TD_MAC_WIN] = ACTION_TAP_DANCE_DOUBLE(CG_LNRM, CG_LSWP),
+combo_t key_combos[] = {
+  [AB_ESC] = COMBO_ACTION(ab_combo),
+  [JK_TAB] = COMBO(jk_combo, KC_TAB),
+  [QW_SFT] = COMBO(qw_combo, KC_LSFT),
+  [SD_LAYER] = COMBO(sd_combo, MO(_LAYER)),
 };
 
-// const uint16_t PROGMEM test_combo1[] = {CTL_T(KC_E), CTL_T(KC_S), COMBO_END};
-// combo_t key_combos[] = {
-//     COMBO(test_combo1, OUTPUT_HERE),
+void process_combo_event(uint16_t combo_index, bool pressed) {
+  switch(combo_index) {
+    case AB_ESC:
+      if (pressed) {
+        SEND_STRING("john.doe@example.com");
+      }
+      break;
+  }
+}
+
+// tap_dance_action_t tap_dance_actions[] = {
+//     [TD_MAC_WIN] = ACTION_TAP_DANCE_DOUBLE(CG_LNRM, CG_LSWP),
 // };
 
 
@@ -99,7 +104,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_ESCAPE, KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                    KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_SCLN, KC_BSPC,
      KC_LSFT , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   SFT_T(KC_T) ,   KC_G ,                                              KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , CTL_QUOT,
      KC_LCTL , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , CW_TOGG, KC_CAPS,                             FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
-                                     TD(TD_MAC_WIN), KC_LGUI, ALT_ENT, LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB)   ,  KC_ENT    , LT(_SYM, KC_BSPC) ,KC_RALT , KC_RGUI, KC_APP,
+                                    //  TD(TD_MAC_WIN), KC_LGUI, ALT_ENT, LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB)   ,  KC_ENT    , LT(_SYM, KC_BSPC) ,KC_RALT , KC_RGUI, KC_APP,
+                                    KC_D , KC_LGUI, ALT_ENT, LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB)   ,  KC_ENT    , LT(_SYM, KC_BSPC) ,KC_RALT , KC_RGUI, KC_APP,
 
          KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
     ), 
