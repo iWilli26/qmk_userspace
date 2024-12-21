@@ -1,11 +1,3 @@
-#define EURO RALT(KC_5) //€
-#define A_GRV RALT(KC_Z) //à
-#define E_AIG RALT(KC_G) //é
-#define E_GRV RALT(KC_F) //è
-#define U_GRV RALT(KC_H) //ù
-#define C_CED RALT(KC_C) //ç
-#define D_CIR RALT(KC_6) //dead ^
-
 #define LA_NAV LT(NAV, KC_SPC)
 #define LA_SYM LT(SYM, KC_BSPC)
 #define LA_FN LT(FN, KC_ENT)

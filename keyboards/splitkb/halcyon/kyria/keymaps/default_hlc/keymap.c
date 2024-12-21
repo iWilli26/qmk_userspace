@@ -47,27 +47,38 @@ enum layers {
 #define OS_GUI KC_LGUI
 
 enum combos {
-  AB_ESC,
-  JK_TAB,
-  QW_SFT,
+  E_AIG,
+  E_GRV,
+  E_CIR,
 };
 
-const uint16_t PROGMEM ab_combo[] = {CTL_T(KC_E), CTL_T(KC_S), COMBO_END};
-const uint16_t PROGMEM jk_combo[] = {KC_J, KC_K, COMBO_END};
-const uint16_t PROGMEM qw_combo[] = {KC_Q, KC_W, COMBO_END};
+const uint16_t PROGMEM es_combo[] = {CTL_T(KC_E), CTL_T(KC_S), COMBO_END};
+const uint16_t PROGMEM et_combo[] = {CTL_T(KC_E), SFT_T(KC_T), COMBO_END};
+const uint16_t PROGMEM er_combo[] = {CTL_T(KC_E), LALT_T(KC_R), COMBO_END};
 
 combo_t key_combos[] = {
-  [AB_ESC] = COMBO_ACTION(ab_combo),
-  [JK_TAB] = COMBO(jk_combo, KC_TAB),
-  [QW_SFT] = COMBO(qw_combo, KC_LSFT),
+  [E_AIG] = COMBO_ACTION(es_combo),
+  [E_GRV] = COMBO_ACTION(et_combo),
+  [E_CIR] = COMBO_ACTION(er_combo),
 };
 
 void process_combo_event(uint16_t combo_index, bool pressed) {
   switch(combo_index) {
-    case AB_ESC:
+    case E_AIG:
       if (pressed) {
         tap_code16(KC_QUOT);
         tap_code16(KC_E);     
+        }
+      break;
+    case E_GRV:
+      if (pressed) {
+        tap_code16(KC_GRV);
+        tap_code16(KC_E);     
+        }
+      break;
+    case E_CIR:
+      if (pressed) {
+        SEND_STRING("ê");     
         }
       break;
   }
