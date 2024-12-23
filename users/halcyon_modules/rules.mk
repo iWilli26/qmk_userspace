@@ -9,6 +9,7 @@ LTO_ENABLE ?= yes
 # May need to be changed when adding more pointing devices
 POINTING_DEVICE_ENABLE = yes
 POINTING_DEVICE_DRIVER = cirque_pinnacle_spi
+CIRQUE_PINNACLE_ATTENUATION = EXTREG__TRACK_ADCCONFIG__ADC_ATTENUATE_2X
 
 # May need to be changed when adding more displays
 QUANTUM_PAINTER_ENABLE = yes
