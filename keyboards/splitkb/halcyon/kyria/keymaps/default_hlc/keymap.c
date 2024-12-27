@@ -10,7 +10,7 @@
 #include "action_tapping.h"
 #include "host.h"
 #include "print.h"
-
+#include "process_unicode.h"
 
 enum layers {
     _COLEMAK_DH = 0,
@@ -36,7 +36,7 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT  MT(MOD_LALT, KC_ENT)
 
-#define REDO C(KC_Y)
+#define REDO C(S(KC_Y))
 #define UNDO C(KC_Z)
 #define CUT C(KC_X)
 #define COPY C(KC_C)
@@ -125,6 +125,37 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
     }
 
     return true;
+}
+
+enum custom_keycodes {
+  DOT_DASH = SAFE_RANGE
+};
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  static uint16_t my_hash_timer;
+  switch (keycode) {
+    case DOT_DASH:
+      if(record->event.pressed) {
+        my_hash_timer = timer_read();
+        const uint8_t mods = get_mods();
+        if(mods & MOD_BIT(KC_SHIFT)) {
+          SEND_STRING("<");
+        }else{
+          SEND_STRING(",");
+        }
+      } else {
+        if (timer_elapsed(my_hash_timer) < TAPPING_TERM) {
+          const uint8_t mods = get_mods();
+          if(mods & MOD_BIT(KC_SHIFT)) {
+            SEND_STRING("_");
+          }else{
+            SEND_STRING("-");
+          }
+        }
+      }
+      return false; // We handled this keypress
+  }
+  return true; // We didn't handle other keypresses
 }
 
 enum combos {
