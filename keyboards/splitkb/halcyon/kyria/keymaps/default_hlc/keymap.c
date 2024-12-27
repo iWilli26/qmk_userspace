@@ -20,7 +20,6 @@ enum layers {
     _DVORAK,
 };
 
-
 // Aliases for readability
 #define COLEMAK  DF(_COLEMAK_DH)
 #define DVORAK   DF(_DVORAK)
@@ -46,6 +45,87 @@ enum layers {
 #define NEXT_W C(KC_RGHT)
 #define OS_CTL KC_LCTL
 #define OS_GUI KC_LGUI
+
+
+typedef struct {
+    bool    swap_ctl_gui;
+#    ifdef UNICODE_COMMON_ENABLE
+    uint8_t unicode_input_mode;
+#    endif // UNICODE_COMMON_ENABLE
+} os_detection_config_t;
+
+bool process_detected_host_os_user(os_variant_t detected_os) {
+    if (is_keyboard_master()) {
+        os_detection_config_t os_detection_config = {
+            .swap_ctl_gui = false,
+#    ifdef UNICODE_COMMON_ENABLE
+            .unicode_input_mode = UNICODE_MODE_WINCOMPOSE,
+#    endif // UNICODE_COMMON_ENABLE
+        };
+        switch (detected_os) {
+            case OS_UNSURE:
+                xprintf("unknown OS Detected\n");
+                break;
+            case OS_LINUX:
+                xprintf("Linux Detected\n");
+#    ifdef UNICODE_COMMON_ENABLE
+                os_detection_config.unicode_input_mode = UNICODE_MODE_LINUX;
+#    endif // UNICODE_COMMON_ENABLE
+                break;
+            case OS_WINDOWS:
+                xprintf("Windows Detected\n");
+                break;
+#    if 0
+            case OS_WINDOWS_UNSURE:
+                xprintf("Windows? Detected\n");
+                break;
+#    endif
+            case OS_MACOS:
+                xprintf("MacOS Detected\n");
+                os_detection_config = (os_detection_config_t){
+                    .swap_ctl_gui = true,
+#    ifdef UNICODE_COMMON_ENABLE
+                    .unicode_input_mode = UNICODE_MODE_MACOS,
+#    endif // UNICODE_COMMON_ENABLE
+                };
+                userspace_config.pointing.accel.enabled = false;
+                break;
+            case OS_IOS:
+                xprintf("iOS Detected\n");
+                os_detection_config = (os_detection_config_t){
+                    .swap_ctl_gui = true,
+#    ifdef UNICODE_COMMON_ENABLE
+                    .unicode_input_mode = UNICODE_MODE_MACOS,
+#    endif // UNICODE_COMMON_ENABLE
+                };
+                userspace_config.pointing.accel.enabled = false;
+                break;
+#    if 0
+            case OS_PS5:
+                xprintf("PlayStation 5 Detected\n");
+#        ifdef UNICODE_COMMON_ENABLE
+                os_detection_config.unicode_input_mode = UNICODE_MODE_LINUX;
+#        endif // UNICODE_COMMON_ENABLE
+                break;
+            case OS_HANDHELD:
+                xprintf("Nintend Switch/Quest 2 Detected\n");
+#        ifdef UNICODE_COMMON_ENABLE
+                os_detection_config.unicode_input_mode = UNICODE_MODE_LINUX;
+#        endif
+                break;
+#    endif
+            default:
+                xprintf("Unknown OS Detected\n");
+                break;
+        }
+        keymap_config.swap_lctl_lgui = keymap_config.swap_rctl_rgui = os_detection_config.swap_ctl_gui;
+#    ifdef UNICODE_COMMON_ENABLE
+        set_unicode_input_mode_soft(os_detection_config.unicode_input_mode);
+#    endif // UNICODE_COMMON_ENABLE
+    }
+
+    return true;
+}
 
 enum combos {
   E_AIG,
@@ -107,7 +187,6 @@ tap_dance_action_t tap_dance_actions[] = {
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
- 
 /*
  * Base Layer: Colemak DH
  *
@@ -124,8 +203,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
     [_COLEMAK_DH] = LAYOUT_split_3x6_5_hlc(
     KC_ESCAPE, KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                                             KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_SCLN, KC_BSPC,
-     KC_LSFT , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   SFT_T(KC_T) ,   KC_G ,                                                 KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , CTL_QUOT,
-     KC_LCTL , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , CW_TOGG, KC_CAPS,                                                     FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
+     KC_LSFT , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   SFT_T(KC_T) ,   KC_G ,                                                 KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , KC_RSFT,
+     KC_LCTL , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , CW_TOGG, KC_CAPS,                                                     FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , KC_COMM, KC_DOT ,KC_SLSH, CTL_QUOT,
                           TD(TD_MAC_WIN) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  KC_LGUI           ,KC_RALT , KC_ENT    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
 
          KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
