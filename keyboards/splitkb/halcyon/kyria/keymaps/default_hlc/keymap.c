@@ -138,7 +138,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       if(record->event.pressed) {
         my_hash_timer = timer_read();
         const uint8_t mods = get_mods();
-        if(mods & MOD_BIT(KC_SHIFT)) {
+        if(mods & MOD_BIT(MOD_MASK_SHIFT)) {
           SEND_STRING("<");
         }else{
           SEND_STRING(",");
@@ -146,7 +146,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       } else {
         if (timer_elapsed(my_hash_timer) < TAPPING_TERM) {
           const uint8_t mods = get_mods();
-          if(mods & MOD_BIT(KC_SHIFT)) {
+          if(mods & MOD_BIT(MOD_MASK_SHIFT)) {
             SEND_STRING("_");
           }else{
             SEND_STRING("-");
