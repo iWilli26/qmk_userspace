@@ -135,27 +135,18 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   static uint16_t my_hash_timer;
   switch (keycode) {
     case DOT_DASH:
-      if(record->event.pressed) {
+      if (record->event.pressed) {
         my_hash_timer = timer_read();
-        const uint8_t mods = get_mods();
-        if(mods & MOD_BIT(MOD_MASK_SHIFT)) {
-          SEND_STRING("<");
-        }else{
-          SEND_STRING(",");
-        }
       } else {
-        if (timer_elapsed(my_hash_timer) < TAPPING_TERM) {
-          const uint8_t mods = get_mods();
-          if(mods & MOD_BIT(MOD_MASK_SHIFT)) {
-            SEND_STRING("_");
-          }else{
-            SEND_STRING("-");
-          }
+        if (timer_elapsed(my_hash_timer) < 200) {
+          tap_code16(KC_COMMA);
+        } else {
+          tap_code16(KC_MINS);
         }
       }
-      return false; // We handled this keypress
+      break;
   }
-  return true; // We didn't handle other keypresses
+  return true;
 }
 
 enum combos {
