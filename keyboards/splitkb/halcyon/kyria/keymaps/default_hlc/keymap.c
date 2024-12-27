@@ -5,10 +5,12 @@
 #include <keycodes.h>
 #include <stdbool.h>
 #include <unistd.h>  // For sleep function
+
 #include "quantum.h"
 #include "action_tapping.h"
 #include "host.h"
 #include "print.h"
+
 
 enum layers {
     _COLEMAK_DH = 0,
@@ -88,7 +90,6 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                     .unicode_input_mode = UNICODE_MODE_MACOS,
 #    endif // UNICODE_COMMON_ENABLE
                 };
-                userspace_config.pointing.accel.enabled = false;
                 break;
             case OS_IOS:
                 xprintf("iOS Detected\n");
@@ -98,7 +99,6 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                     .unicode_input_mode = UNICODE_MODE_MACOS,
 #    endif // UNICODE_COMMON_ENABLE
                 };
-                userspace_config.pointing.accel.enabled = false;
                 break;
 #    if 0
             case OS_PS5:
