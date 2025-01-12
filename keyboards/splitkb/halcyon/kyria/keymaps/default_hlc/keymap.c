@@ -44,6 +44,17 @@ typedef struct {
 #endif // UNICODE_COMMON_ENABLE
 } os_detection_config_t;
 
+uint16_t UNDO       = C(KC_Z);
+uint16_t CUT        = C(KC_X);
+uint16_t COPY       = C(KC_C);
+uint16_t PASTE      = C(KC_V);
+uint16_t SLCTALL    = C(KC_A);
+uint16_t SAVE       = C(KC_S);
+uint16_t PREV_W     = C(KC_LEFT);
+uint16_t NEXT_W     = C(KC_RGHT);
+uint16_t END_LINE   = KC_END;
+uint16_t START_LINE = KC_HOME;
+
 bool process_detected_host_os_user(os_variant_t detected_os) {
     if (is_keyboard_master()) {
         os_detection_config_t os_detection_config = {
@@ -54,7 +65,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
         };
         switch (detected_os) {
             case OS_UNSURE:
-                xprintf("unknown OS Detected\n");
+                xprintf("Unknown OS Detected\n");
                 break;
             case OS_LINUX:
                 xprintf("Linux Detected\n");
@@ -64,63 +75,38 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 break;
             case OS_WINDOWS:
                 xprintf("Windows Detected\n");
-#define REDO C(S(KC_Z))
-#define UNDO C(KC_Z)
-#define CUT C(KC_X)
-#define COPY C(KC_C)
-#define PASTE C(KC_V)
-#define SLCTALL C(KC_A)
-#define SAVE C(KC_S)
-#define PREV_W C(KC_LEFT)
-#define NEXT_W C(KC_RGHT)
-#define END_LINE KC_END
-#define START_LINE KC_HOME
-                // os_detection_config = (os_detection_config_t){
-                //     .swap_ctl_gui = true,
-                // };
                 break;
             case OS_MACOS:
                 xprintf("MacOS Detected\n");
-#undef REDO
-#undef UNDO
-#undef CUT
-#undef COPY
-#undef PASTE
-#undef SLCTALL
-#undef SAVE
-#undef PREV_W
-#undef NEXT_W
-#undef END_LINE
-#undef START_LINE
-
-#define REDO LGUI(S(KC_Y))
-#define UNDO LGUI(KC_Z)
-#define CUT LGUI(KC_X)
-#define COPY LGUI(KC_C)
-#define PASTE LGUI(KC_V)
-#define SLCTALL LGUI(KC_A)
-#define SAVE LGUI(KC_S)
-#define PREV_W C(KC_LEFT)
-#define NEXT_W C(KC_RGHT)
-#define END_LINE LGUI(KC_RGHT)
-#define START_LINE LGUI(KC_LEFT)
-                // os_detection_config = (os_detection_config_t){
-                //     .swap_ctl_gui = true,
-
+                REDO       = LGUI(S(KC_Y));
+                UNDO       = LGUI(KC_Z);
+                CUT        = LGUI(KC_X);
+                COPY       = LGUI(KC_C);
+                PASTE      = LGUI(KC_V);
+                SLCTALL    = LGUI(KC_A);
+                SAVE       = LGUI(KC_S);
+                PREV_W     = C(KC_LEFT);
+                NEXT_W     = C(KC_RGHT);
+                END_LINE   = LGUI(KC_RGHT);
+                START_LINE = LGUI(KC_LEFT);
+                // Optionally swap Ctrl and GUI keys for macOS
+                // os_detection_config.swap_ctl_gui = true;
                 break;
+
             default:
                 xprintf("Unknown OS Detected\n");
                 break;
         }
-        keymap_config.swap_lctl_lgui = keymap_config.swap_rctl_rgui = os_detection_config.swap_ctl_gui;
+            // keymap_config.swap_lctl_lgui = keymap_config.swap_rctl_rgui = os_detection_config.swap_ctl_gui;
 #ifdef UNICODE_COMMON_ENABLE
         set_unicode_input_mode_soft(os_detection_config.unicode_input_mode);
 #endif // UNICODE_COMMON_ENABLE
+
+        // Optionally, these constants can now be used to send keycodes in other parts of your keymap logic
     }
 
     return true;
 }
-
 enum custom_keycodes { DOT_DASH = SAFE_RANGE };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
