@@ -37,7 +37,7 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT MT(MOD_LALT, KC_ENT)
 
-enum custom_keycodes { REDO = SAFE_RANGE, UNDO, CUT, COPY, PASTE, SELECT_ALL, SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, GUI_STAB };
+enum custom_keycodes { REDO, UNDO, CUT, COPY, PASTE, SELECT_ALL, SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, GUI_STAB };
 
 typedef struct {
     bool swap_ctl_gui;
@@ -124,74 +124,65 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case REDO:
             if (record->event.pressed) {
                 tap_code16(redo_key);
-                return false;
             }
         case UNDO:
             if (record->event.pressed) {
                 tap_code16(undo_key);
-                return false;
             }
             return false;
         case CUT:
             if (record->event.pressed) {
                 tap_code16(cut_key);
-                return false;
             }
             return false;
         case COPY:
             if (record->event.pressed) {
                 tap_code16(copy_key);
-                return false;
             }
             return false;
         case PASTE:
             if (record->event.pressed) {
                 tap_code16(paste_key);
-                return false;
             }
             return false;
         case SELECT_ALL:
             if (record->event.pressed) {
                 tap_code16(select_all_key);
-                return false;
             }
             return false;
         case SAVE:
             if (record->event.pressed) {
                 tap_code16(save_key);
-                return false;
             }
             return false;
         case PREV_W:
             if (record->event.pressed) {
                 tap_code16(prev_word_key);
-                return false;
             }
             return false;
         case NEXT_W:
             if (record->event.pressed) {
                 tap_code16(next_word_key);
-                return false;
             }
             return false;
         case END_LINE:
             if (record->event.pressed) {
                 tap_code16(end_line_key);
-                return false;
             }
             return false;
         case START_LINE:
             if (record->event.pressed) {
                 tap_code16(start_line_key);
-                return false;
             }
             return false;
         case GUI_STAB: {
-            const uint8_t mods = get_mods();
-            if (mods & MOD_BIT(KC_LALT)) {
-                tap_code16(S(KC_TAB));
-            } else {
-                tap_code16(KC_LGUI);
+            if (record->event.pressed) {
+                const uint8_t mods = get_mods();
+                if (mods & MOD_BIT(KC_LALT)) {
+                    tap_code16(S(KC_TAB));
+                } else {
+                    tap_code16(KC_LGUI);
+                }
             }
             break;
         }
