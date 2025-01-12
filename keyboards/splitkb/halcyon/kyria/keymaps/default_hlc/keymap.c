@@ -45,6 +45,7 @@ typedef struct {
     uint8_t unicode_input_mode;
 #endif // UNICODE_COMMON_ENABLE
 } os_detection_config_t;
+
 uint16_t undo_key       = C(KC_Z);
 uint16_t redo_key       = C(S(KC_Z));
 uint16_t cut_key        = C(KC_X);
@@ -56,10 +57,11 @@ uint16_t prev_word_key  = C(KC_LEFT);
 uint16_t next_word_key  = C(KC_RGHT);
 uint16_t end_line_key   = KC_END;
 uint16_t start_line_key = KC_HOME;
-bool     process_detected_host_os_user(os_variant_t detected_os) {
+
+bool process_detected_host_os_user(os_variant_t detected_os) {
     if (is_keyboard_master()) {
         os_detection_config_t os_detection_config = {
-                .swap_ctl_gui = false,
+            .swap_ctl_gui = false,
 #ifdef UNICODE_COMMON_ENABLE
             .unicode_input_mode = UNICODE_MODE_WINCOMPOSE,
 #endif // UNICODE_COMMON_ENABLE
@@ -94,7 +96,7 @@ bool     process_detected_host_os_user(os_variant_t detected_os) {
                 xprintf("Unknown OS Detected\n");
                 break;
         }
-            // keymap_config.swap_lctl_lgui = keymap_config.swap_rctl_rgui = os_detection_config.swap_ctl_gui;
+        keymap_config.swap_lctl_lgui = keymap_config.swap_rctl_rgui = os_detection_config.swap_ctl_gui;
 #ifdef UNICODE_COMMON_ENABLE
         set_unicode_input_mode_soft(os_detection_config.unicode_input_mode);
 #endif // UNICODE_COMMON_ENABLE
@@ -141,10 +143,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             tap_code16(save_key);
             break;
         case PREV_W:
-            tap_code16(prev_window_key);
+            tap_code16(prev_word_key);
             break;
         case NEXT_W:
-            tap_code16(next_window_key);
+            tap_code16(next_word_key);
             break;
         case END_LINE:
             tap_code16(end_line_key);
