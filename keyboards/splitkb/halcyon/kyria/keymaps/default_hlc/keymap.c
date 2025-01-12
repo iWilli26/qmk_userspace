@@ -47,7 +47,7 @@ typedef struct {
 } os_detection_config_t;
 
 uint16_t undo_key       = C(KC_Z);
-uint16_t redo_key       = C(S(KC_Z));
+uint16_t redo_key       = S(C(KC_Z));
 uint16_t cut_key        = C(KC_X);
 uint16_t copy_key       = C(KC_C);
 uint16_t paste_key      = C(KC_V);
