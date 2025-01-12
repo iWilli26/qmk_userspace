@@ -36,19 +36,8 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT  MT(MOD_LALT, KC_ENT)
 
-#define REDO C(S(KC_Y))
-#define UNDO C(KC_Z)
-#define CUT C(KC_X)
-#define COPY C(KC_C)
-#define PASTE C(KC_V)
-#define SLCTALL C(KC_A)
-#define SAVE C(KC_S)
-#define PREV_W C(KC_LEFT)
-#define NEXT_W C(KC_RGHT)
 #define OS_CTL KC_LCTL
 #define OS_GUI KC_LGUI
-
-
 typedef struct {
     bool    swap_ctl_gui;
 #    ifdef UNICODE_COMMON_ENABLE
@@ -76,16 +65,38 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 break;
             case OS_WINDOWS:
                 xprintf("Windows Detected\n");
+                #define REDO C(S(KC_Z))
+                #define UNDO C(KC_Z)
+                #define CUT C(KC_X)
+                #define COPY C(KC_C)
+                #define PASTE C(KC_V)
+                #define SLCTALL C(KC_A)
+                #define SAVE C(KC_S)
+                #define PREV_W C(KC_LEFT)
+                #define NEXT_W C(KC_RGHT)
+                #define END_LINE KC_END 
+                #define START_LINE KC_HOME 
                 break;
-#    if 0
-            case OS_WINDOWS_UNSURE:
-                xprintf("Windows? Detected\n");
-                break;
-#    endif
+            #    if 0
+                        case OS_WINDOWS_UNSURE:
+                            xprintf("Windows? Detected\n");
+                            break;
+            #    endif
             case OS_MACOS:
                 xprintf("MacOS Detected\n");
-                os_detection_config = (os_detection_config_t){
-                    .swap_ctl_gui = true,
+                #define REDO OS_GUI(S(KC_Y))
+                #define UNDO OS_GUI(KC_Z)
+                #define CUT OS_GUI(KC_X)
+                #define COPY OS_GUI(KC_C)
+                #define PASTE OS_GUI(KC_V)
+                #define SLCTALL OS_GUI(KC_A)
+                #define SAVE OS_GUI(KC_S)
+                #define PREV_W C(KC_LEFT)
+                #define NEXT_W C(KC_RGHT)
+                #define END_LINE OS_GUI(KC_RGHT)
+                #define START_LINE OS_GUI(KC_LEFT)
+                // os_detection_config = (os_detection_config_t){
+                //     .swap_ctl_gui = true,
 #    ifdef UNICODE_COMMON_ENABLE
                     .unicode_input_mode = UNICODE_MODE_MACOS,
 #    endif // UNICODE_COMMON_ENABLE
@@ -165,7 +176,7 @@ combo_t key_combos[] = {
   [E_CIR] = COMBO_ACTION(er_combo),
 };
 
-  
+
 void process_combo_event(uint16_t combo_index, bool pressed) {
   switch(combo_index) {
     case E_AIG:
@@ -221,7 +232,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * `----------------------+------+------+------+------+------|                                       |------+------+------+------+------+----------------------'
  *                        |Switch| LGUI | LAlt/| _SELECT| Nav  |                                       | Sym  | SYM  | AltGr| RGUI | Menu |
  *                        |GUI CTL|      | Enter| Space  | Tab  |                                       |      | BkSpc|      |      |      |
- *                        `----------------------------------'                                       `----------------------------------'
+ *                        `----------------------------------'                                       `----------------------------------
  */
     [_COLEMAK_DH] = LAYOUT_split_3x6_5_hlc(
     KC_ESCAPE, KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                                             KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_SCLN, KC_BSPC,
@@ -285,7 +296,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         [_SELECT] = LAYOUT_split_3x6_5_hlc(
      KC_TAB  , COPY ,      S(KC_LEFT)  ,   S(KC_UP)      ,   S(KC_RIGHT)    , SLCTALL   ,                                       KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC,
      CTL_ESC , PASTE ,  C(S(KC_LEFT))   ,  S(KC_DOWN)     ,   C(S(KC_RIGHT)) , UNDO   ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
-     KC_LSFT , CUT ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , KC_LBRC,KC_CAPS  , REDO  ,                         KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
+     KC_LSFT , CUT ,  START_LINE   ,  KC_C  ,   END_LINE ,   KC_B , KC_LBRC,KC_CAPS  , REDO  ,                         KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
                                 ADJUST , KC_LGUI, ALT_ENT, KC_SPC , NAV     , SYM    ,                               KC_SPC ,KC_RALT, KC_RGUI, KC_APP,
 
                                      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
@@ -320,28 +331,30 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 
 /*
- * Base Layer: Dvorak
+ * Base Layer: QWERTY
  *
  * ,-------------------------------------------.                              ,-------------------------------------------.
- * |  Tab   | ' "  | , <  | . >  |   P  |   Y  |                              |   F  |   G  |   C  |   R  |   L  |  Bksp  |
+ * |  Tab   |   Q  |   W  |   E  |   R  |   T  |                              |   Y  |   U  |   I  |   O  |   P  |  Bksp  |
  * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
- * |Ctrl/Esc|   A  |   O  |   E  |   U  |   I  |                              |   D  |   H  |   T  |   N  |   S  |Ctrl/- _|
+ * |Ctrl/Esc|   A  |   S  |   D  |   F  |   G  |                              |   H  |   J  |   K  |   L  | ;  : |Ctrl/' |
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
- * | LShift | ; :  |   Q  |   J  |   K  |   X  | [ {  |CapsLk|  |F-keys|  ] } |   B  |   M  |   W  |   V  |   Z  | RShift |
+ * | LShift |   Z  |   X  |   C  |   V  |   B  | [ {  |CapsLk|  |F-keys|  ] } |   N  |   M  | ,  < | . >  | /  ? | RShift |
  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
  *                        |Adjust| LGUI | LAlt/| Space| Nav  |  | Sym  | Space| AltGr| RGUI | Menu |
  *                        |      |      | Enter|      |      |  |      |      |      |      |      |
  *                        `----------------------------------'  `----------------------------------'
+ * ,-----------------------------------.                                              ,-----------------------------------.
+ * | MUTE | ____ | _____ | ____ | ____ |                                              | MUTE | ____ | _____ | ____ | ____ |
+ * `-----------------------------------'                                              `-----------------------------------'
  */
-    [_DVORAK] = LAYOUT_split_3x6_5_hlc(
-     KC_TAB  ,KC_QUOTE,KC_COMM,  KC_DOT,   KC_P ,   KC_Y ,                                        KC_F,   KC_G ,  KC_C ,   KC_R ,  KC_L , KC_BSPC,
-     CTL_ESC , KC_A ,  KC_O   ,  KC_E  ,   KC_U ,   KC_I ,                                        KC_D,   KC_H ,  KC_T ,   KC_N ,  KC_S , CTL_MINS,
-     KC_LSFT ,KC_SCLN, KC_Q   ,  KC_J  ,   KC_K ,   KC_X , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC, KC_B,   KC_M ,  KC_W ,   KC_V ,  KC_Z , KC_RSFT,
-                                 ADJUST, KC_LGUI, ALT_ENT, KC_SPC , NAV   ,     SYM    , KC_SPC ,KC_RALT, KC_RGUI, KC_APP,
-
-                                      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,     KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
-
+    [_QWERTY] = LAYOUT_split_3x6_5_hlc(
+     KC_TAB  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                        KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC,
+     KC_TAB , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
+     KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
+                                ADJUST , KC_LGUI, ALT_ENT, KC_SPC , NAV   ,     SYM    , KC_SPC ,KC_RALT, KC_RGUI, KC_APP,
+     KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
     ),
+
 
 
 
