@@ -154,7 +154,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case START_LINE:
             tap_code16(start_line_key);
             return false;
-        case GUI_STAB:
+        case GUI_STAB: {
             const uint8_t mods = get_mods();
             if (mods & MOD_BIT(KC_LALT)) {
                 tap_code16(S(KC_TAB));
@@ -162,6 +162,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 tap_code16(KC_LGUI);
             }
             break;
+        }
     }
     return true;
 }
