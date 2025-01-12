@@ -37,7 +37,7 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT MT(MOD_LALT, KC_ENT)
 
-enum custom_keycodes { REDO = SAFE_RANGE, UNDO, CUT, COPY, PASTE, SELECT_ALL, SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH };
+enum custom_keycodes { REDO = SAFE_RANGE, UNDO, CUT, COPY, PASTE, SELECT_ALL, SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, GUI_STAB };
 
 typedef struct {
     bool swap_ctl_gui;
@@ -123,36 +123,44 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             break;
         case REDO:
             tap_code16(redo_key);
-            break;
+            return false;
         case UNDO:
             tap_code16(undo_key);
-            break;
+            return false;
         case CUT:
             tap_code16(cut_key);
-            break;
+            return false;
         case COPY:
             tap_code16(copy_key);
-            break;
+            return false;
         case PASTE:
             tap_code16(paste_key);
-            break;
+            return false;
         case SELECT_ALL:
             tap_code16(select_all_key);
-            break;
+            return false;
         case SAVE:
             tap_code16(save_key);
-            break;
+            return false;
         case PREV_W:
             tap_code16(prev_word_key);
-            break;
+            return false;
         case NEXT_W:
             tap_code16(next_word_key);
-            break;
+            return false;
         case END_LINE:
             tap_code16(end_line_key);
-            break;
+            return false;
         case START_LINE:
             tap_code16(start_line_key);
+            return false;
+        case GUI_STAB:
+            const uint8_t mods = get_mods();
+            if (mods & MOD_BIT(KC_LALT)) {
+                tap_code16(S(KC_TAB));
+            } else {
+                tap_code16(KC_LGUI);
+            }
             break;
     }
     return true;
@@ -293,7 +301,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         [_SELECT] = LAYOUT_split_3x6_5_hlc(
      KC_TAB  , COPY ,      S(KC_LEFT)  ,   S(KC_UP)      ,   S(KC_RIGHT)    , SELECT_ALL   ,                                                 KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC,
      CTL_ESC , PASTE ,  C(S(KC_LEFT))   ,  S(KC_DOWN)     ,   C(S(KC_RIGHT)) , UNDO   ,                                                   KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
-     KC_LSFT , CUT ,    KC_LEFT ,  KC_C  ,   KC_RIGHT ,      KC_B ,       KC_LBRC,        KC_CAPS  , REDO  ,           KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
+     KC_LSFT , CUT ,    KC_LEFT ,  KC_C  ,   KC_RIGHT ,      KC_B ,       REDO,        KC_CAPS  , REDO  ,           KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
                                 ADJUST , KC_LGUI, ALT_ENT, KC_SPC , NAV     , SYM    ,                                    KC_SPC ,KC_RALT, KC_RGUI, KC_APP,
 
                                      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
