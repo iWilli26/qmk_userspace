@@ -81,6 +81,18 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 break;
             case OS_MACOS:
                 xprintf("MacOS Detected\n");
+#undef REDO
+#undef UNDO
+#undef CUT
+#undef COPY
+#undef PASTE
+#undef SLCTALL
+#undef SAVE
+#undef PREV_W
+#undef NEXT_W
+#undef END_LINE
+#undef START_LINE
+
 #define REDO LGUI(S(KC_Y))
 #define UNDO LGUI(KC_Z)
 #define CUT LGUI(KC_X)
