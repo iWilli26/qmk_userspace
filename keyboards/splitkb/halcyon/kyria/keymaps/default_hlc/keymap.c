@@ -4,7 +4,7 @@
 #include QMK_KEYBOARD_H
 #include <keycodes.h>
 #include <stdbool.h>
-#include <unistd.h>  // For sleep function
+#include <unistd.h> // For sleep function
 
 #include "quantum.h"
 #include "action_tapping.h"
@@ -23,35 +23,35 @@ enum layers {
 };
 
 // Aliases for readability
-#define COLEMAK  DF(_COLEMAK_DH)
-#define DVORAK   DF(_DVORAK)
+#define COLEMAK DF(_COLEMAK_DH)
+#define DVORAK DF(_DVORAK)
 
-#define SYM      MO(_SYM)
-#define NAV      MO(_NAV)
-#define FKEYS    MO(_FUNCTION)
-#define ADJUST   MO(_ADJUST)
+#define SYM MO(_SYM)
+#define NAV MO(_NAV)
+#define FKEYS MO(_FUNCTION)
+#define ADJUST MO(_ADJUST)
 
-#define CTL_ESC  MT(MOD_LCTL, KC_ESC)
+#define CTL_ESC MT(MOD_LCTL, KC_ESC)
 #define CTL_QUOT MT(MOD_RCTL, KC_QUOTE)
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
-#define ALT_ENT  MT(MOD_LALT, KC_ENT)
+#define ALT_ENT MT(MOD_LALT, KC_ENT)
 
 #define OS_CTL KC_LCTL
 #define OS_GUI KC_LGUI
 typedef struct {
-    bool    swap_ctl_gui;
-#    ifdef UNICODE_COMMON_ENABLE
+    bool swap_ctl_gui;
+#ifdef UNICODE_COMMON_ENABLE
     uint8_t unicode_input_mode;
-#    endif // UNICODE_COMMON_ENABLE
+#endif // UNICODE_COMMON_ENABLE
 } os_detection_config_t;
 
 bool process_detected_host_os_user(os_variant_t detected_os) {
     if (is_keyboard_master()) {
         os_detection_config_t os_detection_config = {
             .swap_ctl_gui = false,
-#    ifdef UNICODE_COMMON_ENABLE
+#ifdef UNICODE_COMMON_ENABLE
             .unicode_input_mode = UNICODE_MODE_WINCOMPOSE,
-#    endif // UNICODE_COMMON_ENABLE
+#endif // UNICODE_COMMON_ENABLE
         };
         switch (detected_os) {
             case OS_UNSURE:
@@ -59,123 +59,90 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 break;
             case OS_LINUX:
                 xprintf("Linux Detected\n");
-#    ifdef UNICODE_COMMON_ENABLE
+#ifdef UNICODE_COMMON_ENABLE
                 os_detection_config.unicode_input_mode = UNICODE_MODE_LINUX;
-#    endif // UNICODE_COMMON_ENABLE
+#endif // UNICODE_COMMON_ENABLE
                 break;
             case OS_WINDOWS:
                 xprintf("Windows Detected\n");
-                #define REDO C(S(KC_Z))
-                #define UNDO C(KC_Z)
-                #define CUT C(KC_X)
-                #define COPY C(KC_C)
-                #define PASTE C(KC_V)
-                #define SLCTALL C(KC_A)
-                #define SAVE C(KC_S)
-                #define PREV_W C(KC_LEFT)
-                #define NEXT_W C(KC_RGHT)
-                #define END_LINE KC_END 
-                #define START_LINE KC_HOME 
+#define REDO C(S(KC_Z))
+#define UNDO C(KC_Z)
+#define CUT C(KC_X)
+#define COPY C(KC_C)
+#define PASTE C(KC_V)
+#define SLCTALL C(KC_A)
+#define SAVE C(KC_S)
+#define PREV_W C(KC_LEFT)
+#define NEXT_W C(KC_RGHT)
+#define END_LINE KC_END
+#define START_LINE KC_HOME
                 break;
-            #    if 0
-                        case OS_WINDOWS_UNSURE:
-                            xprintf("Windows? Detected\n");
-                            break;
-            #    endif
             case OS_MACOS:
                 xprintf("MacOS Detected\n");
-                #undef REDO
-                #undef UNDO
-                #undef CUT
-                #undef COPY
-                #undef PASTE
-                #undef SLCTALL
-                #undef SAVE
-                #undef PREV_W
-                #undef NEXT_W
-                #undef END_LINE
-                #undef START_LINE
-                
-                #define REDO OS_GUI(S(KC_Y))
-                #define UNDO OS_GUI(KC_Z)
-                #define CUT OS_GUI(KC_X)
-                #define COPY OS_GUI(KC_C)
-                #define PASTE OS_GUI(KC_V)
-                #define SLCTALL OS_GUI(KC_A)
-                #define SAVE OS_GUI(KC_S)
-                #define PREV_W C(KC_LEFT)
-                #define NEXT_W C(KC_RGHT)
-                #define END_LINE OS_GUI(KC_RGHT)
-                #define START_LINE OS_GUI(KC_LEFT)
+#undef REDO
+#undef UNDO
+#undef CUT
+#undef COPY
+#undef PASTE
+#undef SLCTALL
+#undef SAVE
+#undef PREV_W
+#undef NEXT_W
+#undef END_LINE
+#undef START_LINE
+
+#define REDO OS_GUI(S(KC_Y))
+#define UNDO OS_GUI(KC_Z)
+#define CUT OS_GUI(KC_X)
+#define COPY OS_GUI(KC_C)
+#define PASTE OS_GUI(KC_V)
+#define SLCTALL OS_GUI(KC_A)
+#define SAVE OS_GUI(KC_S)
+#define PREV_W C(KC_LEFT)
+#define NEXT_W C(KC_RGHT)
+#define END_LINE OS_GUI(KC_RGHT)
+#define START_LINE OS_GUI(KC_LEFT)
                 // os_detection_config = (os_detection_config_t){
                 //     .swap_ctl_gui = true,
-#    ifdef UNICODE_COMMON_ENABLE
-                    .unicode_input_mode = UNICODE_MODE_MACOS,
-#    endif // UNICODE_COMMON_ENABLE
-                };
+
                 break;
-            case OS_IOS:
-                xprintf("iOS Detected\n");
-                os_detection_config = (os_detection_config_t){
-                    .swap_ctl_gui = true,
-#    ifdef UNICODE_COMMON_ENABLE
-                    .unicode_input_mode = UNICODE_MODE_MACOS,
-#    endif // UNICODE_COMMON_ENABLE
-                };
-                break;
-#    if 0
-            case OS_PS5:
-                xprintf("PlayStation 5 Detected\n");
-#        ifdef UNICODE_COMMON_ENABLE
-                os_detection_config.unicode_input_mode = UNICODE_MODE_LINUX;
-#        endif // UNICODE_COMMON_ENABLE
-                break;
-            case OS_HANDHELD:
-                xprintf("Nintend Switch/Quest 2 Detected\n");
-#        ifdef UNICODE_COMMON_ENABLE
-                os_detection_config.unicode_input_mode = UNICODE_MODE_LINUX;
-#        endif
-                break;
-#    endif
             default:
                 xprintf("Unknown OS Detected\n");
                 break;
         }
         keymap_config.swap_lctl_lgui = keymap_config.swap_rctl_rgui = os_detection_config.swap_ctl_gui;
-#    ifdef UNICODE_COMMON_ENABLE
+#ifdef UNICODE_COMMON_ENABLE
         set_unicode_input_mode_soft(os_detection_config.unicode_input_mode);
-#    endif // UNICODE_COMMON_ENABLE
+#endif // UNICODE_COMMON_ENABLE
     }
 
     return true;
 }
 
-enum custom_keycodes {
-  DOT_DASH = SAFE_RANGE
-};
+enum custom_keycodes { DOT_DASH = SAFE_RANGE };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  static uint16_t my_hash_timer;
-  switch (keycode) {
-    case DOT_DASH:
-      if (record->event.pressed) {
-        my_hash_timer = timer_read();
-      } else {
-        if (timer_elapsed(my_hash_timer) < 200) {
-          tap_code16(KC_COMMA);
-        } else {
-          tap_code16(KC_MINS);
-        }
-      }
-      break;
-  }
-  return true;
+    static uint16_t my_hash_timer;
+    switch (keycode) {
+        case DOT_DASH:
+            if (record->event.pressed) {
+                my_hash_timer = timer_read();
+            } else {
+                if (timer_elapsed(my_hash_timer) < 200) {
+                    tap_code16(KC_COMMA);
+                } else {
+                    tap_code16(KC_MINS);
+                }
+            }
+            break;
+    }
+    return true;
 }
 
 enum combos {
-  E_AIG,
-  E_GRV,
-  E_CIR,
+    E_AIG,
+    E_GRV,
+    E_CIR,
 };
 
 const uint16_t PROGMEM es_combo[] = {CTL_T(KC_E), CTL_T(KC_S), COMBO_END};
@@ -183,42 +150,41 @@ const uint16_t PROGMEM et_combo[] = {CTL_T(KC_E), SFT_T(KC_T), COMBO_END};
 const uint16_t PROGMEM er_combo[] = {CTL_T(KC_E), LALT_T(KC_R), COMBO_END};
 
 combo_t key_combos[] = {
-  [E_AIG] = COMBO_ACTION(es_combo),
-  [E_GRV] = COMBO_ACTION(et_combo),
-  [E_CIR] = COMBO_ACTION(er_combo),
+    [E_AIG] = COMBO_ACTION(es_combo),
+    [E_GRV] = COMBO_ACTION(et_combo),
+    [E_CIR] = COMBO_ACTION(er_combo),
 };
 
-
 void process_combo_event(uint16_t combo_index, bool pressed) {
-  switch(combo_index) {
-    case E_AIG:
-      if (pressed) {
-        const uint8_t mods = get_mods();
-        del_mods(MOD_MASK_SHIFT);
-        tap_code16(KC_QUOT);
-        set_mods(mods);
-        tap_code16(KC_E);     
-        }
-      break;
-    case E_GRV:
-      if (pressed) {
-        const uint8_t mods = get_mods();
-        del_mods(MOD_MASK_SHIFT);
-        tap_code16(KC_GRV);
-        set_mods(mods);
-        tap_code16(KC_E);    
-      }
-      break;
-    case E_CIR:
-      if (pressed) {
-        const uint8_t mods = get_mods();
-        del_mods(MOD_MASK_SHIFT);
-        tap_code16(KC_CIRC);
-        set_mods(mods);
-        tap_code16(KC_E);  
-        }
-      break;   
-  }
+    switch (combo_index) {
+        case E_AIG:
+            if (pressed) {
+                const uint8_t mods = get_mods();
+                del_mods(MOD_MASK_SHIFT);
+                tap_code16(KC_QUOT);
+                set_mods(mods);
+                tap_code16(KC_E);
+            }
+            break;
+        case E_GRV:
+            if (pressed) {
+                const uint8_t mods = get_mods();
+                del_mods(MOD_MASK_SHIFT);
+                tap_code16(KC_GRV);
+                set_mods(mods);
+                tap_code16(KC_E);
+            }
+            break;
+        case E_CIR:
+            if (pressed) {
+                const uint8_t mods = get_mods();
+                del_mods(MOD_MASK_SHIFT);
+                tap_code16(KC_CIRC);
+                set_mods(mods);
+                tap_code16(KC_E);
+            }
+            break;
+    }
 }
 
 enum {
@@ -272,7 +238,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
     [_NAV] = LAYOUT_split_3x6_5_hlc(
       _______, _______, PREV_W, KC_UP, NEXT_W , _______,                                     KC_PGUP, MS_WHLU, MS_UP,   MS_WHLD,  KC_VOLU, KC_DEL,
-      _______, _______, KC_LEFT, KC_DOWN, KC_RIGHT, _______,                                     KC_PGDN, MS_LEFT, MS_DOWN, MS_RGHT, KC_VOLD, KC_INS,
+      _______, START_LINE, KC_LEFT, KC_DOWN, KC_RIGHT, END_LINE,                                     KC_PGDN, MS_LEFT, MS_DOWN, MS_RGHT, KC_VOLD, KC_INS,
       _______, _______, _______, _______, _______, _______, _______, KC_SCRL, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_PSCR,
                                  _______, _______, _______, _______, _______,_______, MS_BTN3, MS_BTN1, MS_BTN2, _______,
 
@@ -306,10 +272,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 
         [_SELECT] = LAYOUT_split_3x6_5_hlc(
-     KC_TAB  , COPY ,      S(KC_LEFT)  ,   S(KC_UP)      ,   S(KC_RIGHT)    , SLCTALL   ,                                       KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC,
-     CTL_ESC , PASTE ,  C(S(KC_LEFT))   ,  S(KC_DOWN)     ,   C(S(KC_RIGHT)) , UNDO   ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
-     KC_LSFT , CUT ,  START_LINE   ,  KC_C  ,   END_LINE ,   KC_B , KC_LBRC,KC_CAPS  , REDO  ,                         KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
-                                ADJUST , KC_LGUI, ALT_ENT, KC_SPC , NAV     , SYM    ,                               KC_SPC ,KC_RALT, KC_RGUI, KC_APP,
+     KC_TAB  , COPY ,      S(KC_LEFT)  ,   S(KC_UP)      ,   S(KC_RIGHT)    , SLCTALL   ,                                                 KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC,
+     CTL_ESC , PASTE ,  C(S(KC_LEFT))   ,  S(KC_DOWN)     ,   C(S(KC_RIGHT)) , UNDO   ,                                                   KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
+     KC_LSFT , CUT ,    KC_LEFT ,  KC_C  ,   KC_RIGHT ,      KC_B ,       KC_LBRC,        KC_CAPS  , REDO  ,           KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
+                                ADJUST , KC_LGUI, ALT_ENT, KC_SPC , NAV     , SYM    ,                                    KC_SPC ,KC_RALT, KC_RGUI, KC_APP,
 
                                      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
 
