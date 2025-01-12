@@ -37,28 +37,29 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT MT(MOD_LALT, KC_ENT)
 
+enum custom_keycodes { REDO = SAFE_RANGE, UNDO, CUT, COPY, PASTE, SELECT_ALL, SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH };
+
 typedef struct {
     bool swap_ctl_gui;
 #ifdef UNICODE_COMMON_ENABLE
     uint8_t unicode_input_mode;
 #endif // UNICODE_COMMON_ENABLE
 } os_detection_config_t;
-
-bool process_detected_host_os_user(os_variant_t detected_os) {
-    uint16_t UNDO       = C(KC_Z);
-    uint16_t REDO       = C(S(KC_Z));
-    uint16_t CUT        = C(KC_X);
-    uint16_t COPY       = C(KC_C);
-    uint16_t PASTE      = C(KC_V);
-    uint16_t SLCTALL    = C(KC_A);
-    uint16_t SAVE       = C(KC_S);
-    uint16_t PREV_W     = C(KC_LEFT);
-    uint16_t NEXT_W     = C(KC_RGHT);
-    uint16_t END_LINE   = KC_END;
-    uint16_t START_LINE = KC_HOME;
+uint16_t undo_key       = C(KC_Z);
+uint16_t redo_key       = C(S(KC_Z));
+uint16_t cut_key        = C(KC_X);
+uint16_t copy_key       = C(KC_C);
+uint16_t paste_key      = C(KC_V);
+uint16_t select_all_key = C(KC_A);
+uint16_t save_key       = C(KC_S);
+uint16_t prev_word_key  = C(KC_LEFT);
+uint16_t next_word_key  = C(KC_RGHT);
+uint16_t end_line_key   = KC_END;
+uint16_t start_line_key = KC_HOME;
+bool     process_detected_host_os_user(os_variant_t detected_os) {
     if (is_keyboard_master()) {
         os_detection_config_t os_detection_config = {
-            .swap_ctl_gui = false,
+                .swap_ctl_gui = false,
 #ifdef UNICODE_COMMON_ENABLE
             .unicode_input_mode = UNICODE_MODE_WINCOMPOSE,
 #endif // UNICODE_COMMON_ENABLE
@@ -69,27 +70,23 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 break;
             case OS_LINUX:
                 xprintf("Linux Detected\n");
-#ifdef UNICODE_COMMON_ENABLE
-                os_detection_config.unicode_input_mode = UNICODE_MODE_LINUX;
-#endif // UNICODE_COMMON_ENABLE
                 break;
             case OS_WINDOWS:
                 xprintf("Windows Detected\n");
                 break;
             case OS_MACOS:
                 xprintf("MacOS Detected\n");
-                REDO       = LGUI(S(KC_Y));
-                UNDO       = LGUI(KC_Z);
-                CUT        = LGUI(KC_X);
-                COPY       = LGUI(KC_C);
-                PASTE      = LGUI(KC_V);
-                SLCTALL    = LGUI(KC_A);
-                SAVE       = LGUI(KC_S);
-                PREV_W     = C(KC_LEFT);
-                NEXT_W     = C(KC_RGHT);
-                END_LINE   = LGUI(KC_RGHT);
-                START_LINE = LGUI(KC_LEFT);
-                // Optionally swap Ctrl and GUI keys for macOS
+                undo_key       = LGUI(KC_Z);
+                redo_key       = LGUI(S(KC_Z));
+                cut_key        = LGUI(KC_X);
+                copy_key       = LGUI(KC_C);
+                paste_key      = LGUI(KC_V);
+                select_all_key = LGUI(KC_A);
+                save_key       = LGUI(KC_S);
+                prev_word_key  = LGUI(KC_LEFT);
+                next_word_key  = LGUI(KC_RGHT);
+                end_line_key   = LGUI(KC_RGHT);
+                start_line_key = LGUI(KC_LEFT);
                 // os_detection_config.swap_ctl_gui = true;
                 break;
 
@@ -107,7 +104,6 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
 
     return true;
 }
-enum custom_keycodes { DOT_DASH = SAFE_RANGE };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     static uint16_t my_hash_timer;
@@ -122,6 +118,39 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     tap_code16(KC_MINS);
                 }
             }
+            break;
+        case REDO:
+            tap_code16(redo_key);
+            break;
+        case UNDO:
+            tap_code16(undo_key);
+            break;
+        case CUT:
+            tap_code16(cut_key);
+            break;
+        case COPY:
+            tap_code16(copy_key);
+            break;
+        case PASTE:
+            tap_code16(paste_key);
+            break;
+        case SELECT_ALL:
+            tap_code16(select_all_key);
+            break;
+        case SAVE:
+            tap_code16(save_key);
+            break;
+        case PREV_W:
+            tap_code16(prev_window_key);
+            break;
+        case NEXT_W:
+            tap_code16(next_window_key);
+            break;
+        case END_LINE:
+            tap_code16(end_line_key);
+            break;
+        case START_LINE:
+            tap_code16(start_line_key);
             break;
     }
     return true;
