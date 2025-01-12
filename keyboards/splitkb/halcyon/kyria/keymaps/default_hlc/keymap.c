@@ -36,8 +36,6 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT MT(MOD_LALT, KC_ENT)
 
-#define OS_CTL KC_LCTL
-#define OS_GUI KC_LGUI
 typedef struct {
     bool swap_ctl_gui;
 #ifdef UNICODE_COMMON_ENABLE
@@ -91,17 +89,17 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
 #undef END_LINE
 #undef START_LINE
 
-#define REDO OS_GUI(S(KC_Y))
-#define UNDO OS_GUI(KC_Z)
-#define CUT OS_GUI(KC_X)
-#define COPY OS_GUI(KC_C)
-#define PASTE OS_GUI(KC_V)
-#define SLCTALL OS_GUI(KC_A)
-#define SAVE OS_GUI(KC_S)
+#define REDO KC_LGUI(S(KC_Y))
+#define UNDO KC_LGUI(KC_Z)
+#define CUT KC_LGUI(KC_X)
+#define COPY KC_LGUI(KC_C)
+#define PASTE KC_LGUI(KC_V)
+#define SLCTALL KC_LGUI(KC_A)
+#define SAVE KC_LGUI(KC_S)
 #define PREV_W C(KC_LEFT)
 #define NEXT_W C(KC_RGHT)
-#define END_LINE OS_GUI(KC_RGHT)
-#define START_LINE OS_GUI(KC_LEFT)
+#define END_LINE KC_LGUI(KC_RGHT)
+#define START_LINE KC_LGUI(KC_LEFT)
                 // os_detection_config = (os_detection_config_t){
                 //     .swap_ctl_gui = true,
 
