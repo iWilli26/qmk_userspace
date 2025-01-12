@@ -44,18 +44,18 @@ typedef struct {
 #endif // UNICODE_COMMON_ENABLE
 } os_detection_config_t;
 
-uint16_t UNDO       = C(KC_Z);
-uint16_t CUT        = C(KC_X);
-uint16_t COPY       = C(KC_C);
-uint16_t PASTE      = C(KC_V);
-uint16_t SLCTALL    = C(KC_A);
-uint16_t SAVE       = C(KC_S);
-uint16_t PREV_W     = C(KC_LEFT);
-uint16_t NEXT_W     = C(KC_RGHT);
-uint16_t END_LINE   = KC_END;
-uint16_t START_LINE = KC_HOME;
-
 bool process_detected_host_os_user(os_variant_t detected_os) {
+    uint16_t UNDO       = C(KC_Z);
+    uint16_t REDO       = C(S(KC_Z));
+    uint16_t CUT        = C(KC_X);
+    uint16_t COPY       = C(KC_C);
+    uint16_t PASTE      = C(KC_V);
+    uint16_t SLCTALL    = C(KC_A);
+    uint16_t SAVE       = C(KC_S);
+    uint16_t PREV_W     = C(KC_LEFT);
+    uint16_t NEXT_W     = C(KC_RGHT);
+    uint16_t END_LINE   = KC_END;
+    uint16_t START_LINE = KC_HOME;
     if (is_keyboard_master()) {
         os_detection_config_t os_detection_config = {
             .swap_ctl_gui = false,
