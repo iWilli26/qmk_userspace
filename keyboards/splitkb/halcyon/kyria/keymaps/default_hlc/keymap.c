@@ -44,6 +44,8 @@ typedef struct {
 #endif // UNICODE_COMMON_ENABLE
 } os_detection_config_t;
 
+int REDO, UNDO, CUT, COPY, PASTE, SLCTALL, SAVE, PREV_W, NEXT_W, END_LINE, START_LINE;
+
 bool process_detected_host_os_user(os_variant_t detected_os) {
     if (is_keyboard_master()) {
         os_detection_config_t os_detection_config = {
@@ -64,42 +66,32 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 break;
             case OS_WINDOWS:
                 xprintf("Windows Detected\n");
-#define REDO C(S(KC_Z))
-#define UNDO C(KC_Z)
-#define CUT C(KC_X)
-#define COPY C(KC_C)
-#define PASTE C(KC_V)
-#define SLCTALL C(KC_A)
-#define SAVE C(KC_S)
-#define PREV_W C(KC_LEFT)
-#define NEXT_W C(KC_RGHT)
-#define END_LINE KC_END
-#define START_LINE KC_HOME
+                REDO       = C(S(KC_Z));
+                UNDO       = C(KC_Z);
+                CUT        = C(KC_X);
+                COPY       = C(KC_C);
+                PASTE      = C(KC_V);
+                SLCTALL    = C(KC_A);
+                SAVE       = C(KC_S);
+                PREV_W     = C(KC_LEFT);
+                NEXT_W     = C(KC_RGHT);
+                END_LINE   = KC_END;
+                START_LINE = KC_HOME;
+                break;
+
             case OS_MACOS:
                 xprintf("MacOS Detected\n");
-#undef REDO
-#undef UNDO
-#undef CUT
-#undef COPY
-#undef PASTE
-#undef SLCTALL
-#undef SAVE
-#undef PREV_W
-#undef NEXT_W
-#undef END_LINE
-#undef START_LINE
-
-#define REDO LGUI(S(KC_Y))
-#define UNDO LGUI(KC_Z)
-#define CUT LGUI(KC_X)
-#define COPY LGUI(KC_C)
-#define PASTE LGUI(KC_V)
-#define SLCTALL LGUI(KC_A)
-#define SAVE LGUI(KC_S)
-#define PREV_W C(KC_LEFT)
-#define NEXT_W C(KC_RGHT)
-#define END_LINE LGUI(KC_RGHT)
-#define START_LINE LGUI(KC_LEFT)
+                REDO       = LGUI(S(KC_Z));
+                UNDO       = LGUI(KC_Z);
+                CUT        = LGUI(KC_X);
+                COPY       = LGUI(KC_C);
+                PASTE      = LGUI(KC_V);
+                SLCTALL    = LGUI(KC_A);
+                SAVE       = LGUI(KC_S);
+                PREV_W     = C(KC_LEFT);
+                NEXT_W     = C(KC_RGHT);
+                END_LINE   = LGUI(KC_RGHT);
+                START_LINE = LGUI(KC_LEFT);
                 // os_detection_config = (os_detection_config_t){
                 //     .swap_ctl_gui = true,
 
