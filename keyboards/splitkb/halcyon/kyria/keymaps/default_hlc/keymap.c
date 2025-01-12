@@ -19,6 +19,7 @@ enum layers {
     _SELECT,
     _FUNCTION,
     _ADJUST,
+    _QWERTY,
     _DVORAK,
 };
 
