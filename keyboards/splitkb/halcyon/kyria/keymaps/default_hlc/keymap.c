@@ -74,7 +74,6 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
 #define NEXT_W C(KC_RGHT)
 #define END_LINE KC_END
 #define START_LINE KC_HOME
-                break;
             case OS_MACOS:
                 xprintf("MacOS Detected\n");
 #undef REDO
@@ -89,17 +88,17 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
 #undef END_LINE
 #undef START_LINE
 
-#define REDO KC_LGUI(S(KC_Y))
-#define UNDO KC_LGUI(KC_Z)
-#define CUT KC_LGUI(KC_X)
-#define COPY KC_LGUI(KC_C)
-#define PASTE KC_LGUI(KC_V)
-#define SLCTALL KC_LGUI(KC_A)
-#define SAVE KC_LGUI(KC_S)
+#define REDO LGUI(S(KC_Y))
+#define UNDO LGUI(KC_Z)
+#define CUT LGUI(KC_X)
+#define COPY LGUI(KC_C)
+#define PASTE LGUI(KC_V)
+#define SLCTALL LGUI(KC_A)
+#define SAVE LGUI(KC_S)
 #define PREV_W C(KC_LEFT)
 #define NEXT_W C(KC_RGHT)
-#define END_LINE KC_LGUI(KC_RGHT)
-#define START_LINE KC_LGUI(KC_LEFT)
+#define END_LINE LGUI(KC_RGHT)
+#define START_LINE LGUI(KC_LEFT)
                 // os_detection_config = (os_detection_config_t){
                 //     .swap_ctl_gui = true,
 
