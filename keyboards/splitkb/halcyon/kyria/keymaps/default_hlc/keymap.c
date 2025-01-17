@@ -57,7 +57,6 @@ uint16_t slc_next_word_key  = C(S(KC_RGHT));
 uint16_t slc_prev_word_key  = C(S(KC_LEFT));
 uint16_t slc_start_line_key = C(S(KC_LEFT));
 uint16_t slc_end_line_key   = C(S(KC_RGHT));
-uint16_t slc_next_word_key  = C(S(KC_RGHT));
 
 uint16_t end_line_key   = KC_END;
 uint16_t start_line_key = KC_HOME;
