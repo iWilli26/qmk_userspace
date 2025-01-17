@@ -83,8 +83,8 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 paste_key                        = LGUI(KC_V);
                 select_all_key                   = LGUI(KC_A);
                 save_key                         = LGUI(KC_S);
-                prev_word_key                    = KC_LALT(KC_LEFT);
-                next_word_key                    = KC_LALT(KC_RGHT);
+                prev_word_key                    = LALT(KC_LEFT);
+                next_word_key                    = LALT(KC_RGHT);
                 end_line_key                     = LGUI(KC_RGHT);
                 start_line_key                   = LGUI(KC_LEFT);
                 os_detection_config.swap_ctl_gui = true;
