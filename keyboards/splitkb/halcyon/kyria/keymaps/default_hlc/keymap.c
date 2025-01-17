@@ -23,7 +23,6 @@ enum layers {
     _DVORAK,
 };
 
-// Aliases for readability
 #define COLEMAK DF(_COLEMAK_DH)
 #define DVORAK DF(_DVORAK)
 
@@ -45,9 +44,8 @@ typedef struct {
     uint8_t unicode_input_mode;
 #endif // UNICODE_COMMON_ENABLE
 } os_detection_config_t;
-
 uint16_t undo_key       = C(KC_Z);
-uint16_t redo_key       = S(C(KC_Z));
+uint16_t redo_key       = C(KC_Y);
 uint16_t cut_key        = C(KC_X);
 uint16_t copy_key       = C(KC_C);
 uint16_t paste_key      = C(KC_V);
@@ -78,18 +76,18 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 break;
             case OS_MACOS:
                 xprintf("MacOS Detected\n");
-                undo_key       = LGUI(KC_Z);
-                redo_key       = LGUI(S(KC_Z));
-                cut_key        = LGUI(KC_X);
-                copy_key       = LGUI(KC_C);
-                paste_key      = LGUI(KC_V);
-                select_all_key = LGUI(KC_A);
-                save_key       = LGUI(KC_S);
-                prev_word_key  = LGUI(KC_LEFT);
-                next_word_key  = LGUI(KC_RGHT);
-                end_line_key   = LGUI(KC_RGHT);
-                start_line_key = LGUI(KC_LEFT);
-                // os_detection_config.swap_ctl_gui = true;
+                undo_key                         = LGUI(KC_Z);
+                redo_key                         = LGUI(S(KC_Z));
+                cut_key                          = LGUI(KC_X);
+                copy_key                         = LGUI(KC_C);
+                paste_key                        = LGUI(KC_V);
+                select_all_key                   = LGUI(KC_A);
+                save_key                         = LGUI(KC_S);
+                prev_word_key                    = KC_LALT(KC_LEFT);
+                next_word_key                    = KC_LALT(KC_RGHT);
+                end_line_key                     = LGUI(KC_RGHT);
+                start_line_key                   = LGUI(KC_LEFT);
+                os_detection_config.swap_ctl_gui = true;
                 break;
 
             default:
@@ -267,7 +265,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_ESCAPE, KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                                             KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_SCLN, KC_BSPC,
      KC_LSFT , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   SFT_T(KC_T) ,   KC_G ,                                                 KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , KC_RSFT,
      KC_LCTL , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , CW_TOGG, KC_CAPS,                                                     FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , DOT_DASH, KC_DOT ,KC_SLSH, CTL_QUOT,
-                          TD(TD_MAC_WIN) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  GUI_STAB           ,KC_RALT , KC_ENT    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
+                          MO(_QWERTY) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  GUI_STAB           ,KC_RALT , KC_ENT    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
 
          KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
     ), 
@@ -324,8 +322,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
         [_SELECT] = LAYOUT_split_3x6_5_hlc(
      KC_TAB  , COPY ,      S(KC_LEFT)  ,   S(KC_UP)      ,   S(KC_RIGHT)    , SELECT_ALL   ,                                                 KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC,
-     CTL_ESC , PASTE ,  C(S(KC_LEFT))   ,  S(KC_DOWN)     ,   C(S(KC_RIGHT)) , UNDO   ,                                                   KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
-     KC_LSFT , CUT ,    KC_LEFT ,  KC_C  ,   KC_RIGHT ,      REDO ,       REDO,        KC_CAPS  , REDO  ,           KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
+     KC_LSFT , PASTE ,  C(S(KC_LEFT))   ,  S(KC_DOWN)     ,   C(S(KC_RIGHT)) , UNDO   ,                                                   KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
+     CTL_ESC , CUT ,    KC_LEFT ,  KC_C  ,   KC_RIGHT ,      REDO ,       REDO,        KC_CAPS  , REDO  ,           KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
                                 ADJUST , KC_LGUI, ALT_ENT, KC_SPC , NAV     , SYM    ,                                    KC_SPC ,KC_RALT, KC_RGUI, KC_APP,
 
                                      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
@@ -380,7 +378,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      KC_TAB  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                        KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC,
      KC_TAB , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
      KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
-                                ADJUST , KC_LGUI, ALT_ENT, KC_SPC , NAV   ,     SYM    , KC_SPC ,KC_RALT, KC_RGUI, KC_APP,
+                                MO(_COLEMAK_DH) , KC_LGUI, ALT_ENT, KC_SPC , NAV   ,     SYM    , KC_SPC ,KC_RALT, KC_RGUI, KC_APP,
      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
     ),
 
