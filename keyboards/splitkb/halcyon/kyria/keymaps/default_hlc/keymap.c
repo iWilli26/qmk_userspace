@@ -18,7 +18,7 @@ enum layers {
     _NAV,
     _SELECT,
     _FUNCTION,
-    _ADJUST,
+    _GAME,
     _QWERTY,
     _DVORAK,
 };
@@ -29,7 +29,7 @@ enum layers {
 #define SYM MO(_SYM)
 #define NAV MO(_NAV)
 #define FKEYS MO(_FUNCTION)
-#define ADJUST MO(_ADJUST)
+#define ADJUST MO(_GAME)
 
 #define CTL_ESC MT(MOD_LCTL, KC_ESC)
 #define CTL_QUOT MT(MOD_RCTL, KC_QUOTE)
@@ -294,7 +294,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_ESCAPE, KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                                             KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_SCLN, KC_BSPC,
      KC_LSFT , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   SFT_T(KC_T) ,   KC_G ,                                                 KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , KC_RSFT,
      KC_LCTL , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , CW_TOGG, KC_CAPS,                                                     FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , DOT_DASH, KC_DOT ,KC_SLSH, CTL_QUOT,
-                          TO(_QWERTY) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  GUI_STAB           ,KC_RALT , LT(_SELECT, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
+                          TO(_QWERTY) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  GUI_STAB           ,KC_RALT , LT(_SELECT, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, TO(_GAME),
 
          KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
     ), 
@@ -400,11 +400,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * | MUTE | ____ | _____ | ____ | ____ |                                              | MUTE | ____ | _____ | ____ | ____ |
  * `-----------------------------------'                                              `-----------------------------------'
  */
-    [_QWERTY] = LAYOUT_split_3x6_5_hlc(
+    [_GAME] = LAYOUT_split_3x6_5_hlc(
      KC_ESCAPE  ,KC_ESCAPE, KC_Q ,  KC_W   ,  KC_E  ,   KC_R  ,                                        KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC,
      KC_LSFT , KC_TAB, KC_A ,  KC_S   ,  KC_D  ,   KC_F  ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
      KC_LCTL , KC_LSFT,KC_1 ,  KC_2   ,  KC_3  ,   KC_4  , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
-                                TO(_COLEMAK_DH), LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  GUI_STAB           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
+                                TO(_COLEMAK_DH), LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  GUI_STAB           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, TO(_COLEMAK_DH),
 
      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
     ),
@@ -427,10 +427,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                        |      |      |      |      |      |  |      |      |      |      |      |
  *                        `----------------------------------'  `----------------------------------'
  */
-    [_ADJUST] = LAYOUT_split_3x6_5_hlc(
-     KC_ESCAPE  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                          KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC,
-     KC_LSFT , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                         KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
-     KC_LCTL , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
+    [_QWERTY] = LAYOUT_split_3x6_5_hlc(
+     KC_ESCAPE  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                          KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC, KC_T , 
+     KC_LSFT , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                         KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT, KC_T , 
+     KC_LCTL , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT, KC_T , 
                                 TO(_COLEMAK_DH), LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  GUI_STAB           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
 
      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
