@@ -44,20 +44,20 @@ typedef struct {
     uint8_t unicode_input_mode;
 #endif // UNICODE_COMMON_ENABLE
 } os_detection_config_t;
-uint16_t undo_key          = C(KC_Z);
-uint16_t redo_key          = C(KC_Y);
-uint16_t cut_key           = C(KC_X);
-uint16_t copy_key          = C(KC_C);
-uint16_t paste_key         = C(KC_V);
-uint16_t select_all_key    = C(KC_A);
-uint16_t save_key          = C(KC_S);
-uint16_t prev_word_key     = C(KC_LEFT);
-uint16_t next_word_key     = C(KC_RGHT);
-uint16_t slc_next_word_key = C(S(KC_RGHT));
-uint16_t slc_prev_word_key = C(S(KC_LEFT));
-
-uint16_t slc_end_line_key  = C(S(KC_RGHT));
-uint16_t slc_next_word_key = C(S(KC_RGHT));
+uint16_t undo_key           = C(KC_Z);
+uint16_t redo_key           = C(KC_Y);
+uint16_t cut_key            = C(KC_X);
+uint16_t copy_key           = C(KC_C);
+uint16_t paste_key          = C(KC_V);
+uint16_t select_all_key     = C(KC_A);
+uint16_t save_key           = C(KC_S);
+uint16_t prev_word_key      = C(KC_LEFT);
+uint16_t next_word_key      = C(KC_RGHT);
+uint16_t slc_next_word_key  = C(S(KC_RGHT));
+uint16_t slc_prev_word_key  = C(S(KC_LEFT));
+uint16_t slc_start_line_key = C(S(KC_LEFT));
+uint16_t slc_end_line_key   = C(S(KC_RGHT));
+uint16_t slc_next_word_key  = C(S(KC_RGHT));
 
 uint16_t end_line_key   = KC_END;
 uint16_t start_line_key = KC_HOME;
@@ -295,7 +295,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_ESCAPE, KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                                             KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_SCLN, KC_BSPC,
      KC_LSFT , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   SFT_T(KC_T) ,   KC_G ,                                                 KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , KC_RSFT,
      KC_LCTL , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , CW_TOGG, KC_CAPS,                                                     FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , DOT_DASH, KC_DOT ,KC_SLSH, CTL_QUOT,
-                          TO(_QWERTY) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  GUI_STAB           ,KC_RALT , KC_ENT    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
+                          TO(_QWERTY) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  GUI_STAB           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
 
          KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
     ), 
@@ -351,10 +351,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 
         [_SELECT] = LAYOUT_split_3x6_5_hlc(
-     KC_TAB  , COPY ,      S(KC_LEFT)  ,   S(KC_UP)      ,   S(KC_RIGHT)    , SELECT_ALL   ,                                                 KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC,
-     KC_LSFT , PASTE ,  SLC_PREV_WORD   ,  S(KC_DOWN)     ,   SLC_NEXT_WORD , UNDO   ,                                                   KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
+     KC_TAB  , COPY ,      S(KC_LEFT)  ,   S(KC_UP)      ,   S(KC_RIGHT)    , SELECT_ALL   ,                                              _______,  PREV_W, KC_UP, NEXT_W , _______,_______, 
+     KC_LSFT , PASTE ,  SLC_PREV_WORD   ,  S(KC_DOWN)     ,   SLC_NEXT_WORD , UNDO   ,                                                  START_LINE, KC_LEFT, KC_DOWN, KC_RIGHT, END_LINE,KC_H,
      CTL_ESC , CUT ,    SLC_START_LINE ,  KC_C  ,           SLC_END_LINE ,      REDO ,       REDO,        KC_CAPS  , REDO  ,           KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
-                                ADJUST , KC_LGUI, ALT_ENT, KC_SPC , NAV     , SYM    ,                                    KC_SPC ,KC_RALT, KC_RGUI, KC_APP,
+                                ADJUST , KC_LGUI, ALT_ENT, KC_SPC , NAV     ,                                                            SYM    ,KC_ENT ,KC_BSPC, KC_RGUI, KC_APP,
 
                                      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
 
