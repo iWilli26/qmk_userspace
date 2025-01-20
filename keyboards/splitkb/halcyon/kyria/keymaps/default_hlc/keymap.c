@@ -132,6 +132,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if (record->event.pressed) {
                 tap_code16(redo_key);
             }
+            return false;
         case UNDO:
             if (record->event.pressed) {
                 tap_code16(undo_key);
