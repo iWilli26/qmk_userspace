@@ -82,7 +82,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
             case OS_MACOS:
                 xprintf("MacOS Detected\n");
                 undo_key                         = LGUI(KC_Z);
-                redo_key                         = LGUI(S(KC_Z));
+                redo_key                         = LSG(KC_Z);
                 cut_key                          = LGUI(KC_X);
                 copy_key                         = LGUI(KC_C);
                 paste_key                        = LGUI(KC_V);
@@ -205,7 +205,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case GUI_STAB: {
             if (record->event.pressed) {
                 const uint8_t mods = get_mods();
-                if (mods & MOD_BIT(KC_LALT)) {
+                if (mods & MOD_BIT(KC_LALT) || mods & MOD_BIT(KC_LGUI)) {
                     tap_code16(S(KC_TAB));
                 } else {
                     tap_code16(KC_LGUI);
