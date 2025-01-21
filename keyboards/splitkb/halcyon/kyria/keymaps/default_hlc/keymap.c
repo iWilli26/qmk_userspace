@@ -217,7 +217,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case CTL_CLICK:{
             if (record->event.pressed) {
                 register_code(KC_LCTL);      // Press and hold Ctrl
-                tap_code(MS_BTN1);        // Tap Left Click
+                tap_code(KC_MS_BTN1);        // Tap Left Click
                 unregister_code(KC_LCTL);    // Release Ctrl
             }
             break;
