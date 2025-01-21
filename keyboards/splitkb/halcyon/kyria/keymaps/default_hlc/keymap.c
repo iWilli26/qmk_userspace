@@ -231,6 +231,7 @@ enum combos {
     E_AIG,
     E_GRV,
     E_CIR,
+    A_GRV
 };
 
 const uint16_t PROGMEM es_combo[] = {CTL_T(KC_E), CTL_T(KC_S), COMBO_END};
