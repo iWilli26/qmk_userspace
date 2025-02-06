@@ -72,13 +72,11 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
         switch (detected_os) {
             case OS_UNSURE:
                 xprintf("Unknown OS Detected\n");
-                break;
-            case OS_LINUX:
-                xprintf("Linux Detected\n");
-                break;
             case OS_WINDOWS:
                 xprintf("Windows Detected\n");
                 break;
+            case OS_LINUX:
+                xprintf("Linux Detected\n");
             case OS_MACOS:
                 xprintf("MacOS Detected\n");
                 undo_key                         = LGUI(KC_Z);
