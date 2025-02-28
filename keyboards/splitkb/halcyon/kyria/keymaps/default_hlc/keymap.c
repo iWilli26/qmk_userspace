@@ -102,6 +102,22 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
 
             default:
                 xprintf("Unknown OS Detected\n");
+                undo_key                         = LGUI(KC_Z);
+                redo_key                         = LSG(KC_Z);
+                cut_key                          = LGUI(KC_X);
+                copy_key                         = LGUI(KC_C);
+                paste_key                        = LGUI(KC_V);
+                select_all_key                   = LGUI(KC_A);
+                save_key                         = LGUI(KC_S);
+                prev_word_key                    = LALT(KC_LEFT);
+                next_word_key                    = LALT(KC_RGHT);
+                slc_next_word_key                = LALT(S(KC_RGHT));
+                slc_prev_word_key                = LALT(S(KC_LEFT));
+                slc_end_line_key                 = LGUI(S(KC_RGHT));
+                slc_start_line_key               = LGUI(S(KC_LEFT));
+                end_line_key                     = LGUI(KC_RGHT);
+                start_line_key                   = LGUI(KC_LEFT);
+                os_detection_config.swap_ctl_gui = true;
                 break;
         }
         keymap_config.swap_lctl_lgui = keymap_config.swap_rctl_rgui = os_detection_config.swap_ctl_gui;
