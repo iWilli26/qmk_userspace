@@ -12,6 +12,9 @@
 #include "print.h"
 #include "process_unicode.h"
 
+#define OS_DETECTION_DEBOUNCE 500
+#define OS_DETECTION_KEYBOARD_RESET
+
 enum layers {
     _COLEMAK_DH = 0,
     _SYM,
