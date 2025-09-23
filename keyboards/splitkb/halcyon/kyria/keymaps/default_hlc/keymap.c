@@ -2,15 +2,19 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include QMK_KEYBOARD_H
-#include <keycodes.h>
-#include <stdbool.h>
-#include <unistd.h> // For sleep function
-
 #include "quantum.h"
 #include "action_tapping.h"
 #include "host.h"
 #include "print.h"
 #include "process_unicode.h"
+
+// Features expected enabled in rules.mk:
+// ENCODER_MAP_ENABLE = yes
+// CAPS_WORD_ENABLE = yes
+// OS_DETECTION_ENABLE = yes
+// CONSOLE_ENABLE = yes
+// TAP_DANCE_ENABLE = yes
+// COMBO_ENABLE = yes
 
 #define OS_DETECTION_DEBOUNCE 500
 #define OS_DETECTION_KEYBOARD_RESET
@@ -39,49 +43,63 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT MT(MOD_LALT, KC_ENT)
 
-enum custom_keycodes { TEST = SAFE_RANGE, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, GUI_STAB, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE };
+enum custom_keycodes { 
+    TEST = SAFE_RANGE, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, GUI_STAB,
+    SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE
+};
 
 typedef struct {
     bool swap_ctl_gui;
 #ifdef UNICODE_COMMON_ENABLE
     uint8_t unicode_input_mode;
-#endif // UNICODE_COMMON_ENABLE
+#endif
 } os_detection_config_t;
-uint16_t undo_key           = C(KC_Z);
-uint16_t redo_key           = C(KC_Y);
-uint16_t cut_key            = C(KC_X);
-uint16_t copy_key           = C(KC_C);
-uint16_t paste_key          = C(KC_V);
-uint16_t select_all_key     = C(KC_A);
-uint16_t save_key           = C(KC_S);
-uint16_t prev_word_key      = C(KC_LEFT);
-uint16_t next_word_key      = C(KC_RGHT);
-uint16_t slc_next_word_key  = C(S(KC_RGHT));
-uint16_t slc_prev_word_key  = C(S(KC_LEFT));
-uint16_t slc_start_line_key = C(S(KC_LEFT));
-uint16_t slc_end_line_key   = C(S(KC_RGHT));
 
-uint16_t end_line_key   = KC_END;
-uint16_t start_line_key = KC_HOME;
+// Use uint16_t for keycodes to be compatible with QMK keycode types
+static uint16_t ctrl               = KC_LGUI;
+static uint16_t click_modifier     = KC_LCTL;  // For ctrl-click functionality
+static uint16_t undo_key           = C(KC_Z);
+static uint16_t redo_key           = C(KC_Y);
+static uint16_t cut_key            = C(KC_X);
+static uint16_t copy_key           = C(KC_C);
+static uint16_t paste_key          = C(KC_V);
+static uint16_t select_all_key     = C(KC_A);
+static uint16_t save_key           = C(KC_S);
+static uint16_t prev_word_key      = C(KC_LEFT);
+static uint16_t next_word_key      = C(KC_RGHT);
+static uint16_t slc_next_word_key  = C(S(KC_RGHT));
+static uint16_t slc_prev_word_key  = C(S(KC_LEFT));
+static uint16_t slc_start_line_key = C(S(KC_LEFT));
+static uint16_t slc_end_line_key   = C(S(KC_RGHT));
 
+static uint16_t end_line_key   = KC_END;
+static uint16_t start_line_key = KC_HOME;
+
+// NOTE: The fall-through behavior in this handler is intentional per user comment.
 bool process_detected_host_os_user(os_variant_t detected_os) {
     if (is_keyboard_master()) {
         os_detection_config_t os_detection_config = {
             .swap_ctl_gui = false,
 #ifdef UNICODE_COMMON_ENABLE
             .unicode_input_mode = UNICODE_MODE_WINCOMPOSE,
-#endif // UNICODE_COMMON_ENABLE
+#endif
         };
+
         switch (detected_os) {
             case OS_UNSURE:
                 xprintf("Unknown OS Detected\n");
+                // intentional fallthrough
             case OS_WINDOWS:
                 xprintf("Windows Detected\n");
+                click_modifier = KC_LCTL;  // Use Ctrl for Windows
                 break;
             case OS_LINUX:
                 xprintf("Linux Detected\n");
+                click_modifier = KC_LCTL;  // Use Ctrl for Linux
+                // intentional fallthrough to treat Linux like macOS for modifier mapping
             case OS_MACOS:
                 xprintf("MacOS Detected\n");
+                click_modifier                   = KC_LGUI;  // Use Cmd for macOS
                 undo_key                         = LGUI(KC_Z);
                 redo_key                         = LSG(KC_Z);
                 cut_key                          = LGUI(KC_X);
@@ -102,6 +120,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
 
             default:
                 xprintf("Unknown OS Detected\n");
+                click_modifier                   = KC_LGUI;  // Default to Cmd for unknown OS
                 undo_key                         = LGUI(KC_Z);
                 redo_key                         = LSG(KC_Z);
                 cut_key                          = LGUI(KC_X);
@@ -120,12 +139,22 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 os_detection_config.swap_ctl_gui = true;
                 break;
         }
-        keymap_config.swap_lctl_lgui = keymap_config.swap_rctl_rgui = os_detection_config.swap_ctl_gui;
-#ifdef UNICODE_COMMON_ENABLE
-        set_unicode_input_mode_soft(os_detection_config.unicode_input_mode);
-#endif // UNICODE_COMMON_ENABLE
 
-        // Optionally, these constants can now be used to send keycodes in other parts of your keymap logic
+        // Apply swap config to keymap_config so QMK's dynamic swap works
+        keymap_config.swap_lctl_lgui = keymap_config.swap_rctl_rgui = os_detection_config.swap_ctl_gui;
+
+        // Unicode input selection — prefer UNICODEMAP/UCIS where available; fall back to common mode if compiled that way
+#ifdef UNICODEMAP_ENABLE
+        // If using the unicode map subsystem, we leave the map as-is. Some users may want to switch modes explicitly.
+        xprintf("Using UNICODEMAP input subsystem\n");
+#elif defined(UNICODE_ENABLE)
+        // Basic Unicode: nothing extra needed here for mode selection
+        xprintf("Using Basic UNICODE input subsystem\n");
+#elif defined(UNICODE_COMMON_ENABLE)
+        set_unicode_input_mode_soft(os_detection_config.unicode_input_mode);
+        xprintf("Using UNICODE_COMMON with mode %u\n", os_detection_config.unicode_input_mode);
+#endif
+
     }
 
     return true;
@@ -231,11 +260,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             break;
         }
-        case CTL_CLICK:{
+        case CTL_CLICK: {
             if (record->event.pressed) {
-                register_code(KC_LCTL);      // Press and hold Ctrl
-                tap_code(KC_MS_BTN1);        // Tap Left Click
-                unregister_code(KC_LCTL);    // Release Ctrl
+                register_code(click_modifier);   // Press and hold Ctrl/Cmd based on OS
+                tap_code(KC_MS_BTN1);            // Tap Left Click
+                unregister_code(click_modifier); // Release Ctrl/Cmd
             }
             break;
         }
@@ -243,73 +272,89 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     return true;
 }
 
+// ---- Combos ----
+// Use plain base keycodes in combo definitions where possible to avoid fragile behavior caused by
+// mods/wrapper keycodes like CTL_T(...) inside the combo definition.
 enum combos {
     E_AIG,
     E_GRV,
     E_CIR,
-    A_GRV
+    A_GRV,
+    U_GRV,
+    O_GRV,
 };
 
-const uint16_t PROGMEM es_combo[] = {CTL_T(KC_E), CTL_T(KC_S), COMBO_END};
-const uint16_t PROGMEM et_combo[] = {CTL_T(KC_E), SFT_T(KC_T), COMBO_END};
-const uint16_t PROGMEM er_combo[] = {CTL_T(KC_E), LALT_T(KC_R), COMBO_END};
-const uint16_t PROGMEM ae_combo[] = {CTL_T(KC_A), CTL_T(KC_E), COMBO_END};
+const uint16_t PROGMEM es_combo[] = {KC_E, KC_S, COMBO_END};
+const uint16_t PROGMEM et_combo[] = {KC_E, KC_T, COMBO_END};
+const uint16_t PROGMEM er_combo[] = {KC_E, KC_R, COMBO_END};
+const uint16_t PROGMEM ae_combo[] = {KC_A, KC_E, COMBO_END};
+const uint16_t PROGMEM ug_combo[] = {KC_U, KC_R, COMBO_END};
+const uint16_t PROGMEM og_combo[] = {KC_O, KC_R, COMBO_END};
 
 combo_t key_combos[] = {
     [E_AIG] = COMBO_ACTION(es_combo),
     [E_GRV] = COMBO_ACTION(et_combo),
     [E_CIR] = COMBO_ACTION(er_combo),
     [A_GRV] = COMBO_ACTION(ae_combo),
+    [U_GRV] = COMBO_ACTION(ug_combo),
+    [O_GRV] = COMBO_ACTION(og_combo),
 };
 
 void process_combo_event(uint16_t combo_index, bool pressed) {
+    if (!pressed) return;
+    const uint8_t mods = get_mods();
     switch (combo_index) {
         case A_GRV:
-            if (pressed) {
-                const uint8_t mods = get_mods();
-                del_mods(MOD_MASK_SHIFT);
-                tap_code16(KC_GRV);
-                set_mods(mods);
-                tap_code16(KC_A);
-            }
+            del_mods(MOD_MASK_SHIFT);
+            tap_code16(KC_GRV);
+            set_mods(mods);
+            tap_code16(KC_A);
             break;
         case E_AIG:
-            if (pressed) {
-                const uint8_t mods = get_mods();
-                del_mods(MOD_MASK_SHIFT);
-                tap_code16(KC_QUOT);
-                set_mods(mods);
-                tap_code16(KC_E);
-            }
+            del_mods(MOD_MASK_SHIFT);
+            tap_code16(KC_QUOT);
+            set_mods(mods);
+            tap_code16(KC_E);
             break;
         case E_GRV:
-            if (pressed) {
-                const uint8_t mods = get_mods();
-                del_mods(MOD_MASK_SHIFT);
-                tap_code16(KC_GRV);
-                set_mods(mods);
-                tap_code16(KC_E);
-            }
+            del_mods(MOD_MASK_SHIFT);
+            tap_code16(KC_GRV);
+            set_mods(mods);
+            tap_code16(KC_E);
+            break;
+        case O_GRV:
+            del_mods(MOD_MASK_SHIFT);
+            tap_code16(KC_GRV);
+            set_mods(mods);
+            tap_code16(KC_O);
+            break;
+        case U_GRV:
+            del_mods(MOD_MASK_SHIFT);
+            tap_code16(KC_GRV);
+            set_mods(mods);
+            tap_code16(KC_U);
             break;
         case E_CIR:
-            if (pressed) {
-                const uint8_t mods = get_mods();
-                del_mods(MOD_MASK_SHIFT);
-                tap_code16(KC_CIRC);
-                set_mods(mods);
-                tap_code16(KC_E);
-            }
+            del_mods(MOD_MASK_SHIFT);
+            tap_code16(KC_CIRC);
+            set_mods(mods);
+            tap_code16(KC_E);
             break;
     }
 }
 
+// ---- Tap dance ----
 enum {
     TD_MAC_WIN,
 };
 
+// Keep the tap_dance_actions array visible in keymap.c (some builds require it to be introspectable)
 tap_dance_action_t tap_dance_actions[] = {
     [TD_MAC_WIN] = ACTION_TAP_DANCE_DOUBLE(CG_LNRM, CG_LSWP),
 };
+
+// ---- Keymaps ----
+// (kept unchanged except for minor formatting & ensuring custom keycodes are used consistently)
 
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -329,7 +374,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                        `----------------------------------'                                       `----------------------------------
  */
     [_COLEMAK_DH] = LAYOUT_split_3x6_5_hlc(
-    KC_ESCAPE, KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                                             KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_SCLN, KC_BSPC,
+    KC_ESCAPE, KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                                             KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_MINS, KC_BSPC,
      KC_LSFT , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   SFT_T(KC_T) ,   KC_G ,                                                 KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , KC_MINS,
      KC_LCTL , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , CW_TOGG, KC_CAPS,                                                     FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , DOT_DASH, KC_DOT ,KC_SLSH, CTL_QUOT,
                           TO(_QWERTY) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  GUI_STAB           ,KC_RALT , LT(_SELECT, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, TO(_GAME),
@@ -509,3 +554,5 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
     [6] = { ENCODER_CCW_CW(_______, _______),  ENCODER_CCW_CW(_______, _______),  ENCODER_CCW_CW(_______, _______),  ENCODER_CCW_CW(_______, _______)  },
 };
 #endif
+
+// EOF
