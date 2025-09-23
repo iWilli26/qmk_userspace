@@ -1,9 +1,6 @@
 // Include the main display functions so we don't have to initialize the display again
 #include "hlc_tft_display/hlc_tft_display.h"
 
-// Include the QP api
-#include "qp_surface.h"
-
 // Add a font, this font is generated using the QP CLI tools (https://docs.qmk.fm/quantum_painter#quantum-painter-cli)
 #include "graphics/thintel15.qff.h"
 

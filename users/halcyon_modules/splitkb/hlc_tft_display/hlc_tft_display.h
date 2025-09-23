@@ -4,6 +4,7 @@
 #pragma once
 
 #include "qp.h"
+#include "qp_surface.h"
 
 // All values (including hue) are scaled to 0-255
 #define HSV_SPLITKB 145, 235, 155

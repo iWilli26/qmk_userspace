@@ -74,9 +74,22 @@ This can also be used to control which fork is used.
 
 ## Adding splitkb fork to an existing fork
 
+### New branch
+
 If you have already forked the qmk/qmk_userspace repository before you may need to manually add the `halcyon` branch.
 
 1. Add a new upstream `git remote add upstream https://github.com/splitkb/qmk_userspace.git`
 1. Fetch the upstream `git fetch upstream`
 1. Create a new branch based on the upstream `git checkout -b halcyon upstream/halcyon`
 1. Make any changes you want and push it to github `git push -u origin halcyon`
+
+### Existing branch
+
+You may also want to just add the files to your own branch if you have already setup a custom userspace before.
+
+1. Clone or download the files from our fork or add it as a new branch as above.
+1. Copy over the contents of `users/halcyon_modules/rules.mk` and the `users/halcyon_modules/splitkb/` folder to your personal user folder.
+
+If you want to modify an existing keymap (from the original Kyria, Elora or an Aurora board for example). Make sure to add 10 new keys in your keymap (Look at `keyboards/splitkb/halcyon/kyria/keymaps/default_hlc` for an example).
+
+Do note that we use some quantum functions in our userspace so there may be a conflict when compiling. If you use the `_user` functions you should be fine.

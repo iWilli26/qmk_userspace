@@ -4,8 +4,7 @@
 #include "halcyon.h"
 #include "hlc_tft_display.h"
 
-#include "qp_surface.h"
-#include <time.h>
+#include "hardware/structs/rosc.h"
 
 // Fonts mono2
 #include "graphics/fonts/Retron2000-27.qff.h"
@@ -31,9 +30,8 @@ static const char *scroll =      "Scroll";
 static painter_font_handle_t Retron27;
 static painter_font_handle_t Retron27_underline;
 static painter_image_handle_t layer_number;
-backlight_config_t backlight_config;
 
-static uint16_t lcd_surface_fb[135*240];
+static uint8_t lcd_surface_fb[SURFACE_REQUIRED_BUFFER_BYTE_SIZE(135, 240, 16)];
 
 int color_value = 0;
 
@@ -54,6 +52,15 @@ layer_state_t last_layer_state = {0};
 bool grid[GRID_HEIGHT][GRID_WIDTH];  // Current state
 bool new_grid[GRID_HEIGHT][GRID_WIDTH];  // Next state
 bool changed_grid[GRID_HEIGHT][GRID_WIDTH]; // Tracks changed cells
+
+uint32_t get_random_32bit(void) {
+    uint32_t random_value = 0;
+    for (int i = 0; i < 32; i++) {
+        wait_ms(1);
+        random_value = (random_value << 1) | (rosc_hw->randombit & 1);
+    }
+    return random_value;
+}
 
 void init_grid() {
     // Initialize grid with alive cells
@@ -236,39 +243,38 @@ void update_display(void) {
     }
 }
 
-// Quantum function
-void suspend_power_down_kb(void) {
+// Called from halcyon.c
+void module_suspend_power_down_kb(void) {
     qp_power(lcd, false);
-    suspend_power_down_user();
 }
 
-// Quantum function
-void suspend_wakeup_init_kb(void) {
+// Called from halcyon.c
+void module_suspend_wakeup_init_kb(void) {
     qp_power(lcd, true);
-    suspend_wakeup_init_user();
 }
 
 // Called from halcyon.c
 bool module_post_init_kb(void) {
-    setPinOutput(LCD_RST_PIN);
-    writePinHigh(LCD_RST_PIN);
-
-    // Initialise the LCD
-    lcd = qp_st7789_make_spi_device(LCD_WIDTH, LCD_HEIGHT, LCD_CS_PIN, LCD_DC_PIN, LCD_RST_PIN, LCD_SPI_DIVISOR, LCD_SPI_MODE);
-    qp_init(lcd, LCD_ROTATION);
-    qp_set_viewport_offsets(lcd, LCD_OFFSET_X, LCD_OFFSET_Y);
-
-    // Initialise surface
-    lcd_surface = qp_make_rgb565_surface(LCD_WIDTH, LCD_HEIGHT, lcd_surface_fb);
-    qp_init(lcd_surface, LCD_ROTATION);
-
-    // Turn on the LCD and clear the display
-    qp_power(lcd, true);
-    qp_rect(lcd, 0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1, HSV_BLACK, true);
-    qp_flush(lcd);
-
     // Turn on backlight
     backlight_enable();
+
+    // Make the devices
+    lcd = qp_st7789_make_spi_device(LCD_WIDTH, LCD_HEIGHT, LCD_CS_PIN, LCD_DC_PIN, LCD_RST_PIN, LCD_SPI_DIVISOR, LCD_SPI_MODE);
+    lcd_surface = qp_make_rgb565_surface(LCD_WIDTH, LCD_HEIGHT, lcd_surface_fb);
+
+    // Initialise the LCD
+    qp_init(lcd, LCD_ROTATION);
+    qp_set_viewport_offsets(lcd, LCD_OFFSET_X, LCD_OFFSET_Y);
+    qp_clear(lcd);
+    qp_rect(lcd, 0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1, HSV_BLACK, true);
+    qp_power(lcd, true);
+    qp_flush(lcd);
+
+    // Initialise the LCD surface
+    qp_init(lcd_surface, LCD_ROTATION);
+    qp_rect(lcd_surface, 0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1, HSV_BLACK, true);
+    qp_surface_draw(lcd_surface, lcd, 0, 0, 0);
+    qp_flush(lcd);
 
     if(!module_post_init_user()) { return false; }
 
@@ -285,7 +291,7 @@ bool display_module_housekeeping_task_kb(bool second_display) {
         static uint32_t previous_matrix_activity_time = 0;
 
         if(!second_display_set) {
-            srand(time(NULL));
+            srand(get_random_32bit());
             init_grid();
             color_value = rand() % 8;
             second_display_set = true;
@@ -312,6 +318,7 @@ bool display_module_housekeeping_task_kb(bool second_display) {
 
     // Move surface to lcd
     qp_surface_draw(lcd_surface, lcd, 0, 0, 0);
+    qp_flush(lcd);
 
     return true;
 }

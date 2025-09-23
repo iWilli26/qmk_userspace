@@ -8,5 +8,7 @@
 #define HLC_ENCODER
 
 #define HLC_ENCODER_BUTTON GP16
+#undef HLC_ENCODER_A
 #define HLC_ENCODER_A GP27
+#undef HLC_ENCODER_B
 #define HLC_ENCODER_B GP26
