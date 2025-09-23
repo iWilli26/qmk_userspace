@@ -56,7 +56,6 @@ typedef struct {
 } os_detection_config_t;
 
 // Use uint16_t for keycodes to be compatible with QMK keycode types
-static uint16_t ctrl               = KC_LGUI;
 static uint16_t click_modifier     = KC_LCTL;  // For ctrl-click functionality
 static uint16_t undo_key           = C(KC_Z);
 static uint16_t redo_key           = C(KC_Y);
@@ -263,7 +262,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case CTL_CLICK: {
             if (record->event.pressed) {
                 register_code(click_modifier);   // Press and hold Ctrl/Cmd based on OS
-                tap_code(KC_MS_BTN1);            // Tap Left Click
+                tap_code(MS_BTN1);               // Tap Left Click
                 unregister_code(click_modifier); // Release Ctrl/Cmd
             }
             break;
