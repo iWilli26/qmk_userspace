@@ -44,7 +44,7 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT MT(MOD_LALT, KC_ENT)
 
-enum custom_keycodes { TEST = SAFE_RANGE, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, GUI_STAB, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE };
+enum custom_keycodes { TEST = SAFE_RANGE, STAB_NEXT, STAB_PREV, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, GUI_SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE };
 
 typedef struct {
     bool swap_ctl_gui;
@@ -185,27 +185,53 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
 
     return true;
 }
+static bool     is_alt_tab_active = false;
+static uint16_t stab_prev_timer   = 0;
+static uint16_t alt_tab_timer     = 0;
+
+#define ALT_TAB_TIMEOUT 1000 // 1 second timeout
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     static uint16_t my_hash_timer;
     switch (keycode) {
-        case LT(_NAV, KC_TAB):
+        case STAB_NEXT:
             if (record->event.pressed) {
-                const uint8_t mods = get_mods();
-                if (mods & MOD_BIT(KC_LCTL)) {
-                    del_mods(MOD_MASK_CTRL);
+                if (!is_alt_tab_active) {
                     register_code(KC_LALT);
-                    tap_code(KC_TAB);
+                    is_alt_tab_active = true;
+                }
+                tap_code(KC_TAB);
+                alt_tab_timer = timer_read(); // Reset timeout
+            }
+            return false;
+
+        case STAB_PREV:
+            if (record->event.pressed) {
+                stab_prev_timer = timer_read();
+                if (is_alt_tab_active) {
+                    // Alt+Tab is active, send Alt+Shift+Tab to go backwards
+                    tap_code16(S(KC_TAB));
+                    alt_tab_timer = timer_read(); // Reset timeout
                 } else {
-                    tap_code(KC_TAB);
+                    // Alt+Tab not active, activate layer
+                    layer_on(_NAV);
                 }
             } else {
-                const uint8_t mods = get_mods();
-                if (mods & MOD_BIT(KC_LALT)) {
-                    unregister_code(KC_LALT);
+                // Key released
+                if (is_alt_tab_active) {
+                    // Do nothing, let Alt+Tab continue
+                } else {
+                    // Check if it was a tap or hold
+                    if (timer_elapsed(stab_prev_timer) < TAPPING_TERM) {
+                        // Short tap - send Tab
+                        tap_code(KC_TAB);
+                    }
+                    // Release layer
+                    layer_off(_NAV);
                 }
             }
             return false;
+
         case DOT_DASH:
             if (record->event.pressed) {
                 my_hash_timer = timer_read();
@@ -292,17 +318,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 tap_code16(start_line_key);
             }
             return false;
-        case GUI_STAB: {
-            if (record->event.pressed) {
-                const uint8_t mods = get_mods();
-                if (mods & MOD_BIT(KC_LALT) || mods & MOD_BIT(KC_LGUI)) {
-                    tap_code16(S(KC_TAB));
-                } else {
-                    tap_code16(KC_LGUI);
-                }
-            }
-            break;
-        }
         case CTL_CLICK: {
             if (record->event.pressed) {
                 register_code(click_modifier);   // Press and hold Ctrl/Cmd based on OS
@@ -313,8 +328,23 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             break;
         }
+        default:
+            // Any other key released → stop Alt-Tab
+            if (is_alt_tab_active && record->event.pressed) {
+                unregister_code(KC_LALT);
+                is_alt_tab_active = false;
+            }
+            return true;
     }
     return true;
+}
+
+void matrix_scan_user(void) {
+    // Check for Alt+Tab timeout
+    if (is_alt_tab_active && timer_elapsed(alt_tab_timer) > ALT_TAB_TIMEOUT) {
+        unregister_code(KC_LALT);
+        is_alt_tab_active = false;
+    }
 }
 
 // ---- Combos ----
@@ -417,7 +447,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_ESCAPE, KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                                             KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_MINS, KC_BSPC,
      KC_LSFT , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   SFT_T(KC_T) ,   KC_G ,                                                 KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , KC_MINS,
      KC_LCTL , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , CW_TOGG, KC_CAPS,                                                     FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , DOT_DASH, KC_DOT ,KC_SLSH, CTL_QUOT,
-                          TO(_QWERTY) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  GUI_STAB           ,KC_RALT , LT(_SELECT, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, TO(_GAME),
+                          TO(_QWERTY) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , STAB_PREV,  STAB_NEXT           ,KC_RALT , LT(_SELECT, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, TO(_GAME),
 
          KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
     ), 
@@ -527,7 +557,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      KC_ESCAPE  ,KC_ESCAPE, KC_Q ,  KC_W   ,  KC_E  ,   KC_R  ,                                        KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC,
      KC_LSFT , KC_TAB, KC_A ,  KC_S   ,  KC_D  ,   KC_F  ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
      KC_LCTL , KC_LSFT,KC_1 ,  KC_2   ,  KC_3  ,   KC_4  , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
-                                TO(_COLEMAK_DH), LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  GUI_STAB           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, TO(_COLEMAK_DH),
+                                TO(_COLEMAK_DH), LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , STAB_PREV,  STAB_NEXT           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, TO(_COLEMAK_DH),
 
      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
     ),
@@ -554,7 +584,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      KC_ESCAPE  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                          KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC, KC_T , 
      KC_LSFT , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                         KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT, KC_T , 
      KC_LCTL , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT, KC_T , 
-                                TO(_COLEMAK_DH), LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  GUI_STAB           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
+                                TO(_COLEMAK_DH), LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , STAB_PREV,  STAB_NEXT           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
 
      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
 
