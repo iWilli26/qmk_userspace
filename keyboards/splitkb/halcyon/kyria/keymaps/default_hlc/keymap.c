@@ -273,7 +273,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 tap_code16(select_all_key);
             }
             return false;
-        case SAVE:
+        case GUI_SAVE:
             if (record->event.pressed) {
                 tap_code16(save_key);
             }
