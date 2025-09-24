@@ -90,12 +90,42 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 // intentional fallthrough
             case OS_WINDOWS:
                 xprintf("Windows Detected\n");
-                click_modifier = KC_LCTL;  // Use Ctrl for Windows
+                click_modifier                   = KC_LCTL;  // Use Ctrl for Windows
+                undo_key                         = LCTL(KC_Z);
+                redo_key                         = LCTL(KC_Y);
+                cut_key                          = LCTL(KC_X);
+                copy_key                         = LCTL(KC_C);
+                paste_key                        = LCTL(KC_V);
+                select_all_key                   = LCTL(KC_A);
+                save_key                         = LCTL(KC_S);
+                prev_word_key                    = LCTL(KC_LEFT);
+                next_word_key                    = LCTL(KC_RGHT);
+                slc_next_word_key                = LCTL(S(KC_RGHT));
+                slc_prev_word_key                = LCTL(S(KC_LEFT));
+                slc_end_line_key                 = LCTL(S(KC_END));
+                slc_start_line_key               = LCTL(S(KC_HOME));
+                end_line_key                     = KC_END;
+                start_line_key                   = KC_HOME;
                 break;
             case OS_LINUX:
                 xprintf("Linux Detected\n");
-                click_modifier = KC_LCTL;  // Use Ctrl for Linux
-                // intentional fallthrough to treat Linux like macOS for modifier mapping
+                click_modifier                   = KC_LCTL;  // Use Ctrl for Linux
+                undo_key                         = LCTL(KC_Z);
+                redo_key                         = LCTL(KC_Y);
+                cut_key                          = LCTL(KC_X);
+                copy_key                         = LCTL(KC_C);
+                paste_key                        = LCTL(KC_V);
+                select_all_key                   = LCTL(KC_A);
+                save_key                         = LCTL(KC_S);
+                prev_word_key                    = LCTL(KC_LEFT);
+                next_word_key                    = LCTL(KC_RGHT);
+                slc_next_word_key                = LCTL(S(KC_RGHT));
+                slc_prev_word_key                = LCTL(S(KC_LEFT));
+                slc_end_line_key                 = LCTL(S(KC_END));
+                slc_start_line_key               = LCTL(S(KC_HOME));
+                end_line_key                     = KC_END;
+                start_line_key                   = KC_HOME;
+                break;
             case OS_MACOS:
                 xprintf("MacOS Detected\n");
                 click_modifier                   = KC_LGUI;  // Use Cmd for macOS
@@ -262,7 +292,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case CTL_CLICK: {
             if (record->event.pressed) {
                 register_code(click_modifier);   // Press and hold Ctrl/Cmd based on OS
-                tap_code(MS_BTN1);               // Tap Left Click
+                wait_ms(10);                     // Small delay to ensure modifier is registered
+                tap_code16(MS_BTN1);             // Tap Left Click
+                wait_ms(10);                     // Small delay before releasing
                 unregister_code(click_modifier); // Release Ctrl/Cmd
             }
             break;
