@@ -58,8 +58,8 @@ uint16_t prev_word_key      = C(KC_LEFT);
 uint16_t next_word_key      = C(KC_RGHT);
 uint16_t slc_next_word_key  = C(S(KC_RGHT));
 uint16_t slc_prev_word_key  = C(S(KC_LEFT));
-uint16_t slc_start_line_key = C(S(KC_LEFT));
-uint16_t slc_end_line_key   = C(S(KC_RGHT));
+uint16_t slc_start_line_key = S(KC_HOME);
+uint16_t slc_end_line_key   = S(KC_END);
 
 uint16_t end_line_key   = KC_END;
 uint16_t start_line_key = KC_HOME;
@@ -134,6 +134,23 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     static uint16_t my_hash_timer;
     switch (keycode) {
+        case LT(_NAV, KC_TAB):
+            if (record->event.pressed) {
+                const uint8_t mods = get_mods();
+                if (mods & MOD_BIT(KC_LCTL)) {
+                    del_mods(MOD_MASK_CTRL);
+                    register_code(KC_LALT);
+                    tap_code(KC_TAB);
+                } else {
+                    tap_code(KC_TAB);
+                }
+            } else {
+                const uint8_t mods = get_mods();
+                if (mods & MOD_BIT(KC_LALT)) {
+                    unregister_code(KC_LALT);
+                }
+            }
+            return false;
         case DOT_DASH:
             if (record->event.pressed) {
                 my_hash_timer = timer_read();
@@ -231,11 +248,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             break;
         }
-        case CTL_CLICK:{
+        case CTL_CLICK: {
             if (record->event.pressed) {
-                register_code(KC_LCTL);      // Press and hold Ctrl
-                tap_code(KC_MS_BTN1);        // Tap Left Click
-                unregister_code(KC_LCTL);    // Release Ctrl
+                register_code(KC_LCTL);   // Press and hold Ctrl
+                tap_code(KC_MS_BTN1);     // Tap Left Click
+                unregister_code(KC_LCTL); // Release Ctrl
             }
             break;
         }
@@ -243,12 +260,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     return true;
 }
 
-enum combos {
-    E_AIG,
-    E_GRV,
-    E_CIR,
-    A_GRV
-};
+enum combos { E_AIG, E_GRV, E_CIR, A_GRV };
 
 const uint16_t PROGMEM es_combo[] = {CTL_T(KC_E), CTL_T(KC_S), COMBO_END};
 const uint16_t PROGMEM et_combo[] = {CTL_T(KC_E), SFT_T(KC_T), COMBO_END};
