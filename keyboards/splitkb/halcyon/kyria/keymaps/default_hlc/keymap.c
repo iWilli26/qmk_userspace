@@ -100,8 +100,8 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 next_word_key      = LCTL(KC_RGHT);
                 slc_next_word_key  = LCTL(S(KC_RGHT));
                 slc_prev_word_key  = LCTL(S(KC_LEFT));
-                slc_end_line_key   = LCTL(S(KC_END));
-                slc_start_line_key = LCTL(S(KC_HOME));
+                slc_end_line_key   = S(KC_END);
+                slc_start_line_key = S(KC_HOME);
                 end_line_key       = KC_END;
                 start_line_key     = KC_HOME;
                 break;
@@ -189,6 +189,23 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     static uint16_t my_hash_timer;
     switch (keycode) {
+        case LT(_NAV, KC_TAB):
+            if (record->event.pressed) {
+                const uint8_t mods = get_mods();
+                if (mods & MOD_BIT(KC_LCTL)) {
+                    del_mods(MOD_MASK_CTRL);
+                    register_code(KC_LALT);
+                    tap_code(KC_TAB);
+                } else {
+                    tap_code(KC_TAB);
+                }
+            } else {
+                const uint8_t mods = get_mods();
+                if (mods & MOD_BIT(KC_LALT)) {
+                    unregister_code(KC_LALT);
+                }
+            }
+            return false;
         case DOT_DASH:
             if (record->event.pressed) {
                 my_hash_timer = timer_read();
