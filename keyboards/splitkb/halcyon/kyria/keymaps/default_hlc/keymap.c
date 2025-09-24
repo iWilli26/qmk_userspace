@@ -7,6 +7,7 @@
 #include "host.h"
 #include "print.h"
 #include "process_unicode.h"
+#define MASTER_LEFT
 
 // Features expected enabled in rules.mk:
 // ENCODER_MAP_ENABLE = yes
