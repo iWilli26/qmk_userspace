@@ -44,10 +44,7 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT MT(MOD_LALT, KC_ENT)
 
-enum custom_keycodes { 
-    TEST = SAFE_RANGE, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, GUI_STAB,
-    SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE
-};
+enum custom_keycodes { TEST = SAFE_RANGE, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, GUI_STAB, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE };
 
 typedef struct {
     bool swap_ctl_gui;
@@ -57,7 +54,7 @@ typedef struct {
 } os_detection_config_t;
 
 // Use uint16_t for keycodes to be compatible with QMK keycode types
-static uint16_t click_modifier     = KC_LCTL;  // For ctrl-click functionality
+static uint16_t click_modifier     = KC_LCTL; // For ctrl-click functionality
 static uint16_t undo_key           = C(KC_Z);
 static uint16_t redo_key           = C(KC_Y);
 static uint16_t cut_key            = C(KC_X);
@@ -91,45 +88,45 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 // intentional fallthrough
             case OS_WINDOWS:
                 xprintf("Windows Detected\n");
-                click_modifier                   = KC_LCTL;  // Use Ctrl for Windows
-                undo_key                         = LCTL(KC_Z);
-                redo_key                         = LCTL(KC_Y);
-                cut_key                          = LCTL(KC_X);
-                copy_key                         = LCTL(KC_C);
-                paste_key                        = LCTL(KC_V);
-                select_all_key                   = LCTL(KC_A);
-                save_key                         = LCTL(KC_S);
-                prev_word_key                    = LCTL(KC_LEFT);
-                next_word_key                    = LCTL(KC_RGHT);
-                slc_next_word_key                = LCTL(S(KC_RGHT));
-                slc_prev_word_key                = LCTL(S(KC_LEFT));
-                slc_end_line_key                 = LCTL(S(KC_END));
-                slc_start_line_key               = LCTL(S(KC_HOME));
-                end_line_key                     = KC_END;
-                start_line_key                   = KC_HOME;
+                click_modifier     = KC_LCTL; // Use Ctrl for Windows
+                undo_key           = LCTL(KC_Z);
+                redo_key           = LCTL(KC_Y);
+                cut_key            = LCTL(KC_X);
+                copy_key           = LCTL(KC_C);
+                paste_key          = LCTL(KC_V);
+                select_all_key     = LCTL(KC_A);
+                save_key           = LCTL(KC_S);
+                prev_word_key      = LCTL(KC_LEFT);
+                next_word_key      = LCTL(KC_RGHT);
+                slc_next_word_key  = LCTL(S(KC_RGHT));
+                slc_prev_word_key  = LCTL(S(KC_LEFT));
+                slc_end_line_key   = LCTL(S(KC_END));
+                slc_start_line_key = LCTL(S(KC_HOME));
+                end_line_key       = KC_END;
+                start_line_key     = KC_HOME;
                 break;
             case OS_LINUX:
                 xprintf("Linux Detected\n");
-                click_modifier                   = KC_LCTL;  // Use Ctrl for Linux
-                undo_key                         = LCTL(KC_Z);
-                redo_key                         = LCTL(KC_Y);
-                cut_key                          = LCTL(KC_X);
-                copy_key                         = LCTL(KC_C);
-                paste_key                        = LCTL(KC_V);
-                select_all_key                   = LCTL(KC_A);
-                save_key                         = LCTL(KC_S);
-                prev_word_key                    = LCTL(KC_LEFT);
-                next_word_key                    = LCTL(KC_RGHT);
-                slc_next_word_key                = LCTL(S(KC_RGHT));
-                slc_prev_word_key                = LCTL(S(KC_LEFT));
-                slc_end_line_key                 = LCTL(S(KC_END));
-                slc_start_line_key               = LCTL(S(KC_HOME));
-                end_line_key                     = KC_END;
-                start_line_key                   = KC_HOME;
+                click_modifier     = KC_LCTL; // Use Ctrl for Linux
+                undo_key           = LCTL(KC_Z);
+                redo_key           = LCTL(KC_Y);
+                cut_key            = LCTL(KC_X);
+                copy_key           = LCTL(KC_C);
+                paste_key          = LCTL(KC_V);
+                select_all_key     = LCTL(KC_A);
+                save_key           = LCTL(KC_S);
+                prev_word_key      = LCTL(KC_LEFT);
+                next_word_key      = LCTL(KC_RGHT);
+                slc_next_word_key  = LCTL(S(KC_RGHT));
+                slc_prev_word_key  = LCTL(S(KC_LEFT));
+                slc_end_line_key   = LCTL(S(KC_END));
+                slc_start_line_key = LCTL(S(KC_HOME));
+                end_line_key       = KC_END;
+                start_line_key     = KC_HOME;
                 break;
             case OS_MACOS:
                 xprintf("MacOS Detected\n");
-                click_modifier                   = KC_LGUI;  // Use Cmd for macOS
+                click_modifier                   = KC_LGUI; // Use Cmd for macOS
                 undo_key                         = LGUI(KC_Z);
                 redo_key                         = LSG(KC_Z);
                 cut_key                          = LGUI(KC_X);
@@ -150,7 +147,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
 
             default:
                 xprintf("Unknown OS Detected\n");
-                click_modifier                   = KC_LGUI;  // Default to Cmd for unknown OS
+                click_modifier                   = KC_LGUI; // Default to Cmd for unknown OS
                 undo_key                         = LGUI(KC_Z);
                 redo_key                         = LSG(KC_Z);
                 cut_key                          = LGUI(KC_X);
@@ -184,7 +181,6 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
         set_unicode_input_mode_soft(os_detection_config.unicode_input_mode);
         xprintf("Using UNICODE_COMMON with mode %u\n", os_detection_config.unicode_input_mode);
 #endif
-
     }
 
     return true;
@@ -324,12 +320,7 @@ const uint16_t PROGMEM ug_combo[] = {KC_U, SFT_T(KC_T), COMBO_END};
 const uint16_t PROGMEM og_combo[] = {KC_O, SFT_T(KC_T), COMBO_END};
 
 combo_t key_combos[] = {
-    [E_AIG] = COMBO_ACTION(es_combo),
-    [E_GRV] = COMBO_ACTION(et_combo),
-    [E_CIR] = COMBO_ACTION(er_combo),
-    [A_GRV] = COMBO_ACTION(ae_combo),
-    [U_GRV] = COMBO_ACTION(ug_combo),
-    [O_GRV] = COMBO_ACTION(og_combo),
+    [E_AIG] = COMBO_ACTION(es_combo), [E_GRV] = COMBO_ACTION(et_combo), [E_CIR] = COMBO_ACTION(er_combo), [A_GRV] = COMBO_ACTION(ae_combo), [U_GRV] = COMBO_ACTION(ug_combo), [O_GRV] = COMBO_ACTION(og_combo),
 };
 
 void process_combo_event(uint16_t combo_index, bool pressed) {
