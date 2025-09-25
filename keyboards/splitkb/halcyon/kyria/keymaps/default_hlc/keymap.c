@@ -72,6 +72,9 @@ static uint16_t slc_end_line_key   = C(S(KC_RGHT));
 static uint16_t end_line_key   = KC_END;
 static uint16_t start_line_key = KC_HOME;
 
+// Sticky tab variables
+static uint16_t tab_modifier = KC_LALT; // Alt for Windows/Linux, Cmd for macOS
+
 // NOTE: The fall-through behavior in this handler is intentional per user comment.
 bool process_detected_host_os_user(os_variant_t detected_os) {
     if (is_keyboard_master()) {
@@ -104,6 +107,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 slc_start_line_key = S(KC_HOME);
                 end_line_key       = KC_END;
                 start_line_key     = KC_HOME;
+                tab_modifier       = KC_LALT; // Use Alt for Windows
                 break;
             case OS_LINUX:
                 xprintf("Linux Detected\n");
@@ -123,6 +127,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 slc_start_line_key = LCTL(S(KC_HOME));
                 end_line_key       = KC_END;
                 start_line_key     = KC_HOME;
+                tab_modifier       = KC_LALT; // Use Alt for Linux
                 break;
             case OS_MACOS:
                 xprintf("MacOS Detected\n");
@@ -142,6 +147,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 slc_start_line_key               = LGUI(S(KC_LEFT));
                 end_line_key                     = LGUI(KC_RGHT);
                 start_line_key                   = LGUI(KC_LEFT);
+                tab_modifier                     = KC_LGUI; // Use Cmd for macOS
                 os_detection_config.swap_ctl_gui = true;
                 break;
 
@@ -163,6 +169,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 slc_start_line_key               = LGUI(S(KC_LEFT));
                 end_line_key                     = LGUI(KC_RGHT);
                 start_line_key                   = LGUI(KC_LEFT);
+                tab_modifier                     = KC_LGUI; // Default to Cmd for unknown OS
                 os_detection_config.swap_ctl_gui = true;
                 break;
         }
@@ -185,41 +192,41 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
 
     return true;
 }
-static bool     is_alt_tab_active = false;
-static uint16_t stab_prev_timer   = 0;
-static uint16_t alt_tab_timer     = 0;
+static bool     is_sticky_tab_active = false;
+static uint16_t stab_prev_timer      = 0;
+static uint16_t sticky_tab_timer     = 0;
 
-#define ALT_TAB_TIMEOUT 1000 // 1 second timeout
+#define STICKY_TAB_TIMEOUT 1000 // 1 second timeout
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     static uint16_t my_hash_timer;
     switch (keycode) {
         case STAB_NEXT:
             if (record->event.pressed) {
-                if (!is_alt_tab_active) {
-                    register_code(KC_LALT);
-                    is_alt_tab_active = true;
+                if (!is_sticky_tab_active) {
+                    register_code(tab_modifier);
+                    is_sticky_tab_active = true;
                 }
                 tap_code(KC_TAB);
-                alt_tab_timer = timer_read(); // Reset timeout
+                sticky_tab_timer = timer_read(); // Reset timeout
             }
             return false;
 
         case STAB_PREV:
             if (record->event.pressed) {
                 stab_prev_timer = timer_read();
-                if (is_alt_tab_active) {
-                    // Alt+Tab is active, send Alt+Shift+Tab to go backwards
+                if (is_sticky_tab_active) {
+                    // Sticky tab is active, send Shift+Tab to go backwards
                     tap_code16(S(KC_TAB));
-                    alt_tab_timer = timer_read(); // Reset timeout
+                    sticky_tab_timer = timer_read(); // Reset timeout
                 } else {
-                    // Alt+Tab not active, activate layer
+                    // Sticky tab not active, activate layer
                     layer_on(_NAV);
                 }
             } else {
                 // Key released
-                if (is_alt_tab_active) {
-                    // Do nothing, let Alt+Tab continue
+                if (is_sticky_tab_active) {
+                    // Do nothing, let sticky tab continue
                 } else {
                     // Check if it was a tap or hold
                     if (timer_elapsed(stab_prev_timer) < TAPPING_TERM) {
@@ -329,10 +336,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             break;
         }
         default:
-            // Any other key released → stop Alt-Tab
-            if (is_alt_tab_active && record->event.pressed) {
-                unregister_code(KC_LALT);
-                is_alt_tab_active = false;
+            // Any other key pressed → stop sticky tab
+            if (is_sticky_tab_active && record->event.pressed) {
+                unregister_code(tab_modifier);
+                is_sticky_tab_active = false;
             }
             return true;
     }
@@ -340,10 +347,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 
 void matrix_scan_user(void) {
-    // Check for Alt+Tab timeout
-    if (is_alt_tab_active && timer_elapsed(alt_tab_timer) > ALT_TAB_TIMEOUT) {
-        unregister_code(KC_LALT);
-        is_alt_tab_active = false;
+    // Check for sticky tab timeout
+    if (is_sticky_tab_active && timer_elapsed(sticky_tab_timer) > STICKY_TAB_TIMEOUT) {
+        unregister_code(tab_modifier);
+        is_sticky_tab_active = false;
     }
 }
 
