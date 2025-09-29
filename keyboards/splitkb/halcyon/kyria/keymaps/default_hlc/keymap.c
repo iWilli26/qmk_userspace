@@ -213,26 +213,27 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     is_sticky_tab_active = true;
                 }
                 tap_code(KC_TAB);
-                sticky_tab_timer = timer_read(); // Reset timeout
+                sticky_tab_timer = timer_read();
             }
             return false;
 
-        case STAB_PREV: // behaves like SFT_T(KC_T) unless sticky is active
+        case STAB_PREV:
             if (record->event.pressed) {
                 stab_prev_timer = timer_read();
 
                 if (is_sticky_tab_active) {
-                    tap_code16(S(KC_TAB));
+                    tap_code16(S(KC_TAB)); // Alt+Shift+Tab
                 } else {
-                    register_code(KC_LSFT);
+                    register_code(KC_LSFT); // Start shift for hold
                 }
             } else {
-                if (is_sticky_tab_active) {
-                } else {
+                if (!is_sticky_tab_active) {
                     if (timer_elapsed(stab_prev_timer) < TAPPING_TERM) {
+                        // Tap: unregister shift first, then send T
                         unregister_code(KC_LSFT);
                         tap_code(KC_T);
                     } else {
+                        // Hold: just release shift
                         unregister_code(KC_LSFT);
                     }
                 }
