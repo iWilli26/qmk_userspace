@@ -44,7 +44,7 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT MT(MOD_LALT, KC_ENT)
 
-enum custom_keycodes { TEST = SAFE_RANGE, STAB_NEXT, STAB_PREV, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, GUI_SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE };
+enum custom_keycodes { TEST = SAFE_RANGE, STAB_NEXT, STAB_PREV, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, GUI_SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE, GOTOLINE };
 
 typedef struct {
     bool swap_ctl_gui;
@@ -217,29 +217,21 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return false;
 
-        case STAB_PREV:
+        case STAB_PREV: // SFT_T(KC_T)
             if (record->event.pressed) {
                 stab_prev_timer = timer_read();
                 if (is_sticky_tab_active) {
-                    // Sticky tab is active, send Shift+Tab to go backwards
                     tap_code16(S(KC_TAB));
                     sticky_tab_timer = timer_read(); // Reset timeout
                 } else {
-                    // Sticky tab not active, activate layer
-                    layer_on(_NAV);
+                    keycode_down(KC_LSFT);
                 }
             } else {
                 // Key released
                 if (is_sticky_tab_active) {
                     // Do nothing, let sticky tab continue
                 } else {
-                    // Check if it was a tap or hold
-                    if (timer_elapsed(stab_prev_timer) < TAPPING_TERM) {
-                        // Short tap - send Tab
-                        tap_code(KC_TAB);
-                    }
-                    // Release layer
-                    layer_off(_NAV);
+                    tab_code16(KC_T)
                 }
             }
             return false;
@@ -462,9 +454,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
     [_COLEMAK_DH] = LAYOUT_split_3x6_5_hlc(
     KC_ESCAPE, KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                                             KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_MINS, KC_BSPC,
-     KC_LSFT , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   SFT_T(KC_T) ,   KC_G ,                                                 KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , KC_MINS,
+     KC_LSFT , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   STAB_PREV ,   KC_G ,                                                 KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , KC_MINS,
      KC_LCTL , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , CW_TOGG, KC_CAPS,                                                     FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , DOT_DASH, KC_DOT ,KC_SLSH, CTL_QUOT,
-                          TO(_QWERTY) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , STAB_PREV,  STAB_NEXT           ,KC_RALT , LT(_SELECT, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, TO(_GAME),
+                          TO(_QWERTY) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  STAB_NEXT           ,KC_RALT , LT(_SELECT, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, TO(_GAME),
 
          KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
     ), 
