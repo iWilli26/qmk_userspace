@@ -150,7 +150,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 slc_start_line_key               = LGUI(S(KC_LEFT));
                 end_line_key                     = LGUI(KC_RGHT);
                 start_line_key                   = LGUI(KC_LEFT);
-                goto_line_key                    = LGUI(KC_G);
+                goto_line_key                    = C(KC_G);
                 tab_modifier                     = KC_LGUI; // Use Cmd for macOS
                 os_detection_config.swap_ctl_gui = true;
                 break;
@@ -217,29 +217,23 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return false;
 
-        case STAB_PREV: // SFT_T(KC_T)
+        case STAB_PREV: // behaves like SFT_T(KC_T) unless sticky is active
             if (record->event.pressed) {
                 stab_prev_timer = timer_read();
+
                 if (is_sticky_tab_active) {
                     tap_code16(S(KC_TAB));
-                    sticky_tab_timer = timer_read(); // Reset timeout
                 } else {
                     register_code(KC_LSFT);
                 }
             } else {
-                // Key released
                 if (is_sticky_tab_active) {
-                    // Do nothing, let sticky tab continue
                 } else {
-                    // Always release shift first
-                    unregister_code(KC_LSFT);
-                    // Check if it was a tap or hold
                     if (timer_elapsed(stab_prev_timer) < TAPPING_TERM) {
-                        // Short tap - temporarily clear all mods, send T, then restore
-                        const uint8_t mods = get_mods();
-                        clear_mods();
-                        tap_code16(KC_T);
-                        set_mods(mods);
+                        unregister_code(KC_LSFT);
+                        tap_code(KC_T);
+                    } else {
+                        unregister_code(KC_LSFT);
                     }
                 }
             }
