@@ -224,14 +224,20 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     tap_code16(S(KC_TAB));
                     sticky_tab_timer = timer_read(); // Reset timeout
                 } else {
-                    keycode_down(KC_LSFT);
+                    register_code(KC_LSFT);
                 }
             } else {
                 // Key released
                 if (is_sticky_tab_active) {
                     // Do nothing, let sticky tab continue
                 } else {
-                    tab_code16(KC_T)
+                    // Check if it was a tap or hold
+                    if (timer_elapsed(stab_prev_timer) < TAPPING_TERM) {
+                        // Short tap - send T
+                        tap_code16(KC_T);
+                    }
+                    // Always release shift on key up
+                    unregister_code(KC_LSFT);
                 }
             }
             return false;
