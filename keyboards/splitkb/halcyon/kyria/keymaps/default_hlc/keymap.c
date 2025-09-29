@@ -235,8 +235,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     unregister_code(KC_LSFT);
                     // Check if it was a tap or hold
                     if (timer_elapsed(stab_prev_timer) < TAPPING_TERM) {
-                        // Short tap - send T (shift already released)
+                        // Short tap - temporarily clear all mods, send T, then restore
+                        const uint8_t mods = get_mods();
+                        clear_mods();
                         tap_code16(KC_T);
+                        set_mods(mods);
                     }
                 }
             }
