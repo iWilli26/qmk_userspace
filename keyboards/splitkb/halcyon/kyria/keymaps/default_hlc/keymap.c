@@ -68,6 +68,7 @@ static uint16_t slc_next_word_key  = C(S(KC_RGHT));
 static uint16_t slc_prev_word_key  = C(S(KC_LEFT));
 static uint16_t slc_start_line_key = C(S(KC_LEFT));
 static uint16_t slc_end_line_key   = C(S(KC_RGHT));
+static uint16_t goto_line_key      = C(KC_G);
 
 static uint16_t end_line_key   = KC_END;
 static uint16_t start_line_key = KC_HOME;
@@ -107,6 +108,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 slc_start_line_key = S(KC_HOME);
                 end_line_key       = KC_END;
                 start_line_key     = KC_HOME;
+                goto_line_key      = LCTL(KC_G);
                 tab_modifier       = KC_LALT; // Use Alt for Windows
                 break;
             case OS_LINUX:
@@ -125,6 +127,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 slc_prev_word_key  = LCTL(S(KC_LEFT));
                 slc_end_line_key   = LCTL(S(KC_END));
                 slc_start_line_key = LCTL(S(KC_HOME));
+                goto_line_key      = LCTL(KC_G);
                 end_line_key       = KC_END;
                 start_line_key     = KC_HOME;
                 tab_modifier       = KC_LALT; // Use Alt for Linux
@@ -147,6 +150,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 slc_start_line_key               = LGUI(S(KC_LEFT));
                 end_line_key                     = LGUI(KC_RGHT);
                 start_line_key                   = LGUI(KC_LEFT);
+                goto_line_key                    = LGUI(KC_G);
                 tab_modifier                     = KC_LGUI; // Use Cmd for macOS
                 os_detection_config.swap_ctl_gui = true;
                 break;
@@ -169,6 +173,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 slc_start_line_key               = LGUI(S(KC_LEFT));
                 end_line_key                     = LGUI(KC_RGHT);
                 start_line_key                   = LGUI(KC_LEFT);
+                goto_line_key                    = LGUI(KC_G);
                 tab_modifier                     = KC_LGUI; // Default to Cmd for unknown OS
                 os_detection_config.swap_ctl_gui = true;
                 break;
@@ -325,6 +330,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 tap_code16(start_line_key);
             }
             return false;
+        case GOTOLINE:
+            if (record->event.pressed) {
+                tap_code16(goto_line_key);
+            }
+            return false;
         case CTL_CLICK: {
             if (record->event.pressed) {
                 register_code(click_modifier);   // Press and hold Ctrl/Cmd based on OS
@@ -475,7 +485,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                            ----------------------------------  ----------------------------------
  */
     [_NAV] = LAYOUT_split_3x6_5_hlc(
-      _______, _______, PREV_W, KC_UP, NEXT_W , _______,                                     KC_PGUP, MS_WHLU, MS_UP,   MS_WHLD,  KC_VOLU, KC_DEL,
+      _______, _______, PREV_W, KC_UP, NEXT_W , GOTOLINE,                                     KC_PGUP, MS_WHLU, MS_UP,   MS_WHLD,  KC_VOLU, KC_DEL,
       _______, START_LINE, KC_LEFT, KC_DOWN, KC_RIGHT, END_LINE,                                     KC_PGDN, MS_LEFT, MS_DOWN, MS_RGHT, KC_VOLD, KC_INS,
       _______, _______, _______, _______, _______, _______, _______, KC_SCRL, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_PSCR,
                                  _______, _______, _______, _______, _______,MS_BTN3, CTL_CLICK, MS_BTN1, MS_BTN2, _______,
