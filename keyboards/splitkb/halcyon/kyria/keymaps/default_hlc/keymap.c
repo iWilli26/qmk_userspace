@@ -198,7 +198,6 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
     return true;
 }
 static bool     is_sticky_tab_active = false;
-static uint16_t stab_prev_timer      = 0;
 static uint16_t sticky_tab_timer     = 0;
 
 #define STICKY_TAB_TIMEOUT 1000 // 1 second timeout
@@ -219,21 +218,24 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         case STAB_PREV:
             if (record->event.pressed) {
-                stab_prev_timer = timer_read();
+                sticky_tab_timer = timer_read();
 
                 if (is_sticky_tab_active) {
-                    tap_code16(S(KC_TAB)); // Alt+Shift+Tab
+                    // Sticky mode: send Alt+Shift+Tab immediately
+                    tap_code16(S(KC_TAB));
+                    sticky_tab_timer = timer_read();
                 } else {
-                    register_code(KC_LSFT); // Start shift for hold
+                    // Non-sticky: start hold shift like LSFT_T(KC_T)
+                    register_code(KC_LSFT);
                 }
             } else {
                 if (!is_sticky_tab_active) {
-                    if (timer_elapsed(stab_prev_timer) < TAPPING_TERM) {
-                        // Tap: unregister shift first, then send T
-                        unregister_code(KC_LSFT);
-                        tap_code(KC_T);
+                    if (timer_elapsed(sticky_tab_timer) < TAPPING_TERM) {
+                        // Tap: behave like LSFT_T(KC_T)
+                        unregister_code(KC_LSFT); // release our held shift
+                        tap_code(KC_T);           // send T (respects external shift!)
                     } else {
-                        // Hold: just release shift
+                        // Hold: just release our shift
                         unregister_code(KC_LSFT);
                     }
                 }
