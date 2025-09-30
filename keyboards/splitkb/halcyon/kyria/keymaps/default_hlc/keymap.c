@@ -218,7 +218,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         case LSFT_T(KC_T):
             if (record->event.pressed) {
-                sticky_tasb_timer = timer_read();
+                sticky_tab_timer = timer_read();
                 if (is_sticky_tab_active) {
                     tap_code16(S(KC_TAB));
                     sticky_tab_timer = timer_read();
