@@ -216,32 +216,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return false;
 
-        case STAB_PREV:
+        case LSFT_T(KC_T):
             if (record->event.pressed) {
-                sticky_tab_timer = timer_read();
-
+                sticky_tasb_timer = timer_read();
                 if (is_sticky_tab_active) {
-                    // Sticky mode: send Alt+Shift+Tab immediately
                     tap_code16(S(KC_TAB));
                     sticky_tab_timer = timer_read();
-                } else {
-                    // Non-sticky: start hold shift like LSFT_T(KC_T)
-                    register_code(KC_LSFT);
-                }
-            } else {
-                if (!is_sticky_tab_active) {
-                    if (timer_elapsed(sticky_tab_timer) < TAPPING_TERM) {
-                        // Tap: behave like LSFT_T(KC_T)
-                        unregister_code(KC_LSFT); // release our held shift
-                        tap_code(KC_T);           // send T (respects external shift!)
-                    } else {
-                        // Hold: just release our shift
-                        unregister_code(KC_LSFT);
-                    }
                 }
             }
             return false;
-
         case DOT_DASH:
             if (record->event.pressed) {
                 my_hash_timer = timer_read();
@@ -375,7 +358,7 @@ enum combos {
 };
 
 const uint16_t PROGMEM es_combo[] = {CTL_T(KC_E), CTL_T(KC_S), COMBO_END};
-const uint16_t PROGMEM et_combo[] = {CTL_T(KC_E), SFT_T(KC_T), COMBO_END};
+const uint16_t PROGMEM et_combo[] = {CTL_T(KC_E), STAB_PREV, COMBO_END};
 const uint16_t PROGMEM er_combo[] = {CTL_T(KC_E), LALT_T(KC_R), COMBO_END};
 const uint16_t PROGMEM ae_combo[] = {KC_A, CTL_T(KC_E), COMBO_END};
 const uint16_t PROGMEM ug_combo[] = {KC_U, SFT_T(KC_T), COMBO_END};
@@ -460,7 +443,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
     [_COLEMAK_DH] = LAYOUT_split_3x6_5_hlc(
     KC_ESCAPE, KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                                             KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_MINS, KC_BSPC,
-     KC_LSFT , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   STAB_PREV ,   KC_G ,                                                 KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , KC_MINS,
+     KC_LSFT , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   LSFT_T(KC_T) ,   KC_G ,                                                 KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , KC_MINS,
      KC_LCTL , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , CW_TOGG, KC_CAPS,                                                     FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , DOT_DASH, KC_DOT ,KC_SLSH, CTL_QUOT,
                           TO(_QWERTY) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  STAB_NEXT           ,KC_RALT , LT(_SELECT, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, TO(_GAME),
 
