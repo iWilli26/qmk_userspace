@@ -222,10 +222,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 if (is_sticky_tab_active) {
                     tap_code16(S(KC_TAB));
                     sticky_tab_timer = timer_read();
+                    return false;
                 }
-                return false;
+                return true;
             }
-            return true;
         case DOT_DASH:
             if (record->event.pressed) {
                 my_hash_timer = timer_read();
@@ -236,7 +236,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     tap_code16(KC_MINS);
                 }
             }
-            break;
+            return false;
         case REDO:
             if (record->event.pressed) {
                 tap_code16(redo_key);
