@@ -334,6 +334,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if (is_sticky_tab_active && record->event.pressed) {
                 unregister_code(tab_modifier);
                 is_sticky_tab_active = false;
+                return false;
             }
             return true;
     }
