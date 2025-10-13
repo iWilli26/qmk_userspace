@@ -362,7 +362,7 @@ enum combos {
 };
 
 const uint16_t PROGMEM es_combo[] = {CTL_T(KC_E), CTL_T(KC_S), COMBO_END};
-const uint16_t PROGMEM et_combo[] = {CTL_T(KC_E), STAB_PREV, COMBO_END};
+const uint16_t PROGMEM et_combo[] = {CTL_T(KC_E), LSFT_T(KC_T), COMBO_END};
 const uint16_t PROGMEM er_combo[] = {CTL_T(KC_E), LALT_T(KC_R), COMBO_END};
 const uint16_t PROGMEM ae_combo[] = {KC_A, CTL_T(KC_E), COMBO_END};
 const uint16_t PROGMEM ug_combo[] = {KC_U, SFT_T(KC_T), COMBO_END};
