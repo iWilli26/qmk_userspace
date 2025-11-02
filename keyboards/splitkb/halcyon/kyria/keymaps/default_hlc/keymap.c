@@ -417,12 +417,16 @@ void process_combo_event(uint16_t combo_index, bool pressed) {
 
 // ---- Tap dance ----
 enum {
-    TD_MAC_WIN,
+    TD_1,
+    TD_3,
 };
 
 // Keep the tap_dance_actions array visible in keymap.c (some builds require it to be introspectable)
 tap_dance_action_t tap_dance_actions[] = {
-    [TD_MAC_WIN] = ACTION_TAP_DANCE_DOUBLE(CG_LNRM, CG_LSWP),
+    // Single tap: send 1, Double tap: send 2 (game layout behavior)
+    [TD_1] = ACTION_TAP_DANCE_DOUBLE(KC_1, KC_2),
+    // Single tap: send 3, Double tap: send 4 (game layout behavior)
+    [TD_3] = ACTION_TAP_DANCE_DOUBLE(KC_3, KC_4),
 };
 
 // ---- Keymaps ----
@@ -586,7 +590,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      KC_ESCAPE  , KC_LALT   ,  KC_Q   ,  KC_W  ,   KC_E ,   KC_R ,                                          KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC, KC_T , 
      KC_LSFT , KC_TAB ,  KC_A   ,  KC_S  ,   KC_D ,   KC_F ,                                         KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT, KC_T , 
      KC_LCTL , KC_LSFT ,  KC_Z   ,  KC_X  ,   KC_C ,   KC_V , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT, KC_T , 
-                                TO(_COLEMAK_DH), LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , STAB_PREV,  STAB_NEXT           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
+                                TO(_COLEMAK_DH), TD(TD_1) , TD(TD_3) , SPACE,  STAB_NEXT           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
 
      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
 
