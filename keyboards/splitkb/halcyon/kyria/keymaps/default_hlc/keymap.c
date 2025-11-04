@@ -1,8 +1,5 @@
 // Copyright 2024 splitkb.com (support@splitkb.com)
 // SPDX-License-Identifier: GPL-2.0-or-later
-
-#include <stdint.h>
-#include <stdbool.h>
 #include QMK_KEYBOARD_H
 #include "quantum.h"
 #include "action_tapping.h"
@@ -47,7 +44,7 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT MT(MOD_LALT, KC_ENT)
 
-enum custom_keycodes { TEST = SAFE_RANGE, STAB_NEXT, STAB_PREV, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, GUI_SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE, GOTOLINE };
+enum custom_keycodes { TEST = SAFE_RANGE, STAB_NEXT, STAB_PREV, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, GUI_SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE, GOTOLINE, GO_BACK, GO_FORWARD, GO_NEXT_ERROR, GO_PREV_ERROR };
 
 typedef struct {
     bool swap_ctl_gui;
@@ -74,6 +71,8 @@ static uint16_t slc_end_line_key   = C(S(KC_RGHT));
 static uint16_t goto_line_key      = C(KC_G);
 static uint16_t go_back            = LALT(KC_LEFT);
 static uint16_t go_forward         = LALT(KC_RGHT);
+static uint16_t go_next_error      = LALT(KC_F8);
+static uint16_t go_prev_error      = LALT(S(KC_F8));
 
 static uint16_t end_line_key   = KC_END;
 static uint16_t start_line_key = KC_HOME;
@@ -116,6 +115,8 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 goto_line_key      = LCTL(KC_G);
                 go_back            = LALT(KC_MINS);
                 go_forward         = LALT(S(KC_MINS));
+                go_next_error      = LALT(KC_F8);
+                go_prev_error      = LALT(S(KC_F8));
                 tab_modifier       = KC_LALT; // Use Alt for Windows
                 break;
             case OS_LINUX:
@@ -328,6 +329,26 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 tap_code16(goto_line_key);
             }
             return false;
+        case GO_BACK:
+            if (record->event.pressed) {
+                tap_code16(go_back);
+            }
+            return false;
+        case GO_FORWARD:
+            if (record->event.pressed) {
+                tap_code16(go_forward);
+            }
+            return false;
+        case GO_NEXT_ERROR:
+            if (record->event.pressed) {
+                tap_code16(go_next_error);
+            }
+            return false;
+        case GO_PREV_ERROR:
+            if (record->event.pressed) {
+                tap_code16(go_prev_error);
+            }
+            return false;
         case CTL_CLICK: {
             if (record->event.pressed) {
                 register_code(click_modifier);   // Press and hold Ctrl/Cmd based on OS
@@ -483,8 +504,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                            ----------------------------------  ----------------------------------
  */
     [_NAV] = LAYOUT_split_3x6_5_hlc(
-      _______, _______, PREV_W, KC_UP, NEXT_W , GOTOLINE,                                            LGUI(KC_LBRC), MS_WHLU, MS_UP,   MS_WHLD,  KC_VOLU, KC_DEL,
-      _______, START_LINE, KC_LEFT, KC_DOWN, KC_RIGHT, END_LINE,                                     LGUI(KC_RBRC), MS_LEFT, MS_DOWN, MS_RGHT, KC_VOLD, KC_INS,
+      _______, _______, PREV_W, KC_UP, NEXT_W , GOTOLINE,                                            GO_FORWARD, MS_WHLU, MS_UP,   MS_WHLD,  GO_NEXT_ERROR, KC_DEL,
+      _______, START_LINE, KC_LEFT, KC_DOWN, KC_RIGHT, END_LINE,                                     GO_BACK, MS_LEFT, MS_DOWN, MS_RGHT, GO_PREV_ERROR, KC_INS,
       _______, _______, S(KC_F4), KC_F4, KC_F12, _______, _______, KC_SCRL, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_PSCR,
                                  _______, _______, _______, _______, _______,MS_BTN3, CTL_CLICK, MS_BTN1, MS_BTN2, _______,
 
