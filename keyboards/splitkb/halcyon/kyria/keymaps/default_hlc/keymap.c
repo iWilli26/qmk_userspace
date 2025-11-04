@@ -161,8 +161,8 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 end_line_key                     = LGUI(KC_RGHT);
                 start_line_key                   = LGUI(KC_LEFT);
                 goto_line_key                    = C(KC_G);
-                go_back                          = LGUI(KC_MINS);
-                go_forward                       = LGUI(S(KC_MINS));
+                go_back                          = LALT(KC_MINS);
+                go_forward                       = LALT(S(KC_MINS));
                 screenshot_key                   = C(S(KC_5));
                 tab_modifier                     = KC_LGUI; // Use Cmd for macOS
                 os_detection_config.swap_ctl_gui = true;
@@ -350,6 +350,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case GO_PREV_ERROR:
             if (record->event.pressed) {
                 tap_code16(go_prev_error);
+            }
+            return false;
+        case SCREENSHOT:
+            if (record->event.pressed) {
+                tap_code16(screenshot_key);
             }
             return false;
         case CTL_CLICK: {
