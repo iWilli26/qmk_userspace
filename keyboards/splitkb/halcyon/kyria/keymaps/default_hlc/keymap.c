@@ -43,7 +43,7 @@ enum layers {
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT MT(MOD_LALT, KC_ENT)
 
-enum custom_keycodes { TEST = SAFE_RANGE, STAB_NEXT, STAB_PREV, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, GUI_SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE, GOTOLINE, GO_BACK, GO_FORWARD, GO_NEXT_ERROR, GO_PREV_ERROR };
+enum custom_keycodes { TEST = SAFE_RANGE, STAB_NEXT, STAB_PREV, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, GUI_SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE, GOTOLINE, GO_BACK, GO_FORWARD, GO_NEXT_ERROR, GO_PREV_ERROR, SCREENSHOT };
 
 typedef struct {
     bool swap_ctl_gui;
@@ -72,6 +72,7 @@ static uint16_t go_back            = LALT(KC_LEFT);
 static uint16_t go_forward         = LALT(KC_RGHT);
 static uint16_t go_next_error      = LALT(KC_F8);
 static uint16_t go_prev_error      = LALT(S(KC_F8));
+static uint16_t screenshot_key     = RGUI(S(KC_S));
 
 static uint16_t end_line_key   = KC_END;
 static uint16_t start_line_key = KC_HOME;
@@ -162,6 +163,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 goto_line_key                    = C(KC_G);
                 go_back                          = LGUI(KC_MINS);
                 go_forward                       = LGUI(S(KC_MINS));
+                screenshot_key                   = C(S(KC_5));
                 tab_modifier                     = KC_LGUI; // Use Cmd for macOS
                 os_detection_config.swap_ctl_gui = true;
                 break;
@@ -505,9 +507,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                            ----------------------------------  ----------------------------------
  */
     [_NAV] = LAYOUT_split_3x6_5_hlc(
-      _______, _______, PREV_W, KC_UP, NEXT_W , GOTOLINE,                                            GO_FORWARD, MS_WHLU, MS_UP,   MS_WHLD,  GO_PREV_ERROR, KC_DEL,
-      _______, START_LINE, KC_LEFT, KC_DOWN, KC_RIGHT, END_LINE,                                     GO_BACK, MS_LEFT, MS_DOWN, MS_RGHT, GO_NEXT_ERROR, KC_INS,
-      _______, _______, S(KC_F4), KC_F4, KC_F12, _______, _______, KC_SCRL, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_PSCR,
+      _______, _______, PREV_W, KC_UP, NEXT_W , GOTOLINE,                                            GO_FORWARD, MS_WHLU, MS_UP,   MS_WHLD,  GO_PREV_ERROR, KC_VOLU,
+      _______, START_LINE, KC_LEFT, KC_DOWN, KC_RIGHT, END_LINE,                                     GO_BACK, MS_LEFT, MS_DOWN, MS_RGHT, GO_NEXT_ERROR, KC_VOLD,
+      _______, _______, S(KC_F4), KC_F4, KC_F12, _______, _______, KC_SCRL, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, SCREENSHOT, KC_MUTE,
                                  _______, _______, _______, _______, _______,MS_BTN3, CTL_CLICK, MS_BTN1, MS_BTN2, _______,
 
         KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
