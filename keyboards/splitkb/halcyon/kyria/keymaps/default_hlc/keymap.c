@@ -1,12 +1,15 @@
 // Copyright 2024 splitkb.com (support@splitkb.com)
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <stdint.h>
+#include <stdbool.h>
 #include QMK_KEYBOARD_H
 #include "quantum.h"
 #include "action_tapping.h"
 #include "host.h"
 #include "print.h"
 #include "process_unicode.h"
+#include "keycodes.h"
 #define MASTER_LEFT
 
 // Features expected enabled in rules.mk:
@@ -69,6 +72,8 @@ static uint16_t slc_prev_word_key  = C(S(KC_LEFT));
 static uint16_t slc_start_line_key = C(S(KC_LEFT));
 static uint16_t slc_end_line_key   = C(S(KC_RGHT));
 static uint16_t goto_line_key      = C(KC_G);
+static uint16_t go_back            = LALT(KC_LEFT);
+static uint16_t go_forward         = LALT(KC_RGHT);
 
 static uint16_t end_line_key   = KC_END;
 static uint16_t start_line_key = KC_HOME;
@@ -109,6 +114,8 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 end_line_key       = KC_END;
                 start_line_key     = KC_HOME;
                 goto_line_key      = LCTL(KC_G);
+                go_back            = LALT(KC_MINS);
+                go_forward         = LALT(S(KC_MINS));
                 tab_modifier       = KC_LALT; // Use Alt for Windows
                 break;
             case OS_LINUX:
@@ -130,6 +137,8 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 goto_line_key      = LCTL(KC_G);
                 end_line_key       = KC_END;
                 start_line_key     = KC_HOME;
+                go_back            = LALT(KC_MINS);
+                go_forward         = LALT(S(KC_MINS));
                 tab_modifier       = KC_LALT; // Use Alt for Linux
                 break;
             case OS_MACOS:
@@ -474,8 +483,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                            ----------------------------------  ----------------------------------
  */
     [_NAV] = LAYOUT_split_3x6_5_hlc(
-      _______, _______, PREV_W, KC_UP, NEXT_W , GOTOLINE,                                     KC_PGUP, MS_WHLU, MS_UP,   MS_WHLD,  KC_VOLU, KC_DEL,
-      _______, START_LINE, KC_LEFT, KC_DOWN, KC_RIGHT, END_LINE,                                     KC_PGDN, MS_LEFT, MS_DOWN, MS_RGHT, KC_VOLD, KC_INS,
+      _______, _______, PREV_W, KC_UP, NEXT_W , GOTOLINE,                                            LGUI(KC_LBRC), MS_WHLU, MS_UP,   MS_WHLD,  KC_VOLU, KC_DEL,
+      _______, START_LINE, KC_LEFT, KC_DOWN, KC_RIGHT, END_LINE,                                     LGUI(KC_RBRC), MS_LEFT, MS_DOWN, MS_RGHT, KC_VOLD, KC_INS,
       _______, _______, S(KC_F4), KC_F4, KC_F12, _______, _______, KC_SCRL, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_PSCR,
                                  _______, _______, _______, _______, _______,MS_BTN3, CTL_CLICK, MS_BTN1, MS_BTN2, _______,
 
