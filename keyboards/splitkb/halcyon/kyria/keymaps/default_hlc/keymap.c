@@ -160,6 +160,8 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 end_line_key                     = LGUI(KC_RGHT);
                 start_line_key                   = LGUI(KC_LEFT);
                 goto_line_key                    = C(KC_G);
+                go_back                          = LGUI(KC_MINS);
+                go_forward                       = LGUI(S(KC_MINS));
                 tab_modifier                     = KC_LGUI; // Use Cmd for macOS
                 os_detection_config.swap_ctl_gui = true;
                 break;
