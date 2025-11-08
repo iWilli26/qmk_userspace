@@ -619,7 +619,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      KC_ESCAPE  , KC_LALT   ,  KC_Q   ,  KC_W  ,   KC_E ,   KC_R ,                                          KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC, KC_T , 
      KC_LSFT , KC_TAB ,  KC_A   ,  KC_S  ,   KC_D ,   KC_F ,                                         KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT, KC_T , 
      KC_LCTL , KC_LSFT ,  KC_Z   ,  KC_X  ,   KC_C ,   KC_V , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT, KC_T , 
-                                TO(_WAKFU), TD(TD_1) , TD(TD_3) , SPACE,  STAB_NEXT           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
+                                TO(_WAKFU), TD(TD_1) , TD(TD_3) , KC_SPACE,  STAB_NEXT           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
 
      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
 
@@ -629,7 +629,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      KC_D  , KC_E   ,  KC_F   ,  KC_G  ,   KC_H ,   KC_J ,                                          KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC, KC_T , 
      KC_A , KC_B ,  KC_P   ,  KC_S  ,   KC_I ,   KC_M ,                                         KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT, KC_T , 
      KC_5 , KC_6 ,  KC_1   ,  KC_2  ,   KC_3 ,   KC_4 , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT, KC_T , 
-                                TO(_COLEMAK_DH), KC_L , SPACE , KC_LSFT,  STAB_NEXT           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
+                                TO(_COLEMAK_DH), KC_L , KC_SPACE , KC_LSFT,  STAB_NEXT           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
 
      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
 
