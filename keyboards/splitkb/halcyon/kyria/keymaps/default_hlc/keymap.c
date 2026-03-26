@@ -129,8 +129,8 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 goto_line_key      = LCTL(KC_G);
                 end_line_key       = KC_END;
                 start_line_key     = KC_HOME;
-                go_back            = LALT(KC_MINS);
-                go_forward         = LALT(S(KC_MINS));
+                go_back            = LCTL(LALT(KC_MINUS));
+                go_forward         = LCTL(S(KC_MINUS));
                 tab_modifier       = KC_LALT; // Use Alt for Linux
                 break;
             case OS_MACOS:
