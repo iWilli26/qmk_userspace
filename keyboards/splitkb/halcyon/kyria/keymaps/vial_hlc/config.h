@@ -3,15 +3,25 @@
 
 #pragma once
 
-#define VIAL_KEYBOARD_UID {0xEA, 0x55, 0x2E, 0xF9, 0x02, 0xA3, 0x12, 0x94}
+// Split keyboard pointing device configuration
+#define SPLIT_POINTING_ENABLE
+#define POINTING_DEVICE_COMBINED
 
-#define VIAL_UNLOCK_COMBO_ROWS { 0, 5 }
-#define VIAL_UNLOCK_COMBO_COLS { 1, 1 }
+// Specify that the pointing device is on the right side (slave)
+#define POINTING_DEVICE_RIGHT
 
-// Increase the EEPROM size for layout options
-#define VIA_EEPROM_LAYOUT_OPTIONS_SIZE 2
+// Ensure proper communication for trackpad data
+#define SPLIT_TRANSPORT_MIRROR
+#define SPLIT_TRANSACTION_IDS_KB MODULE_SYNC
 
-#define RGB_MATRIX_FRAMEBUFFER_EFFECTS
-#define RGB_MATRIX_KEYPRESSES
+// Master-slave hand detection - ensure left is master
+#define MASTER_LEFT
 
-#define DYNAMIC_KEYMAP_LAYER_COUNT 8
+// Enable additional split features for better communication
+#define SPLIT_MODS_ENABLE
+#define SPLIT_LED_STATE_ENABLE
+#define SPLIT_LAYER_STATE_ENABLE
+
+// Trackpad-specific optimizations
+#define POINTING_DEVICE_TASK_THROTTLE_MS 8
+#define POINTING_DEVICE_AUTO_MOUSE_ENABLE

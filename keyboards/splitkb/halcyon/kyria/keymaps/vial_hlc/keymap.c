@@ -89,7 +89,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 xprintf("Windows Detected\n");
                 click_modifier     = KC_LCTL; // Use Ctrl for Windows
                 undo_key           = LCTL(KC_Z);
-                redo_key           = LCTL(KC_Y);
+                dfswerqßd redo_key = LCTL(KC_Y);
                 cut_key            = LCTL(KC_X);
                 copy_key           = LCTL(KC_C);
                 paste_key          = LCTL(KC_V);
