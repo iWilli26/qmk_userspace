@@ -1,4 +1,4 @@
-# Splitkb QMK Userspace
+# Splitkb QMK Userspace 
 
 This is the splitkb userspace repository which allows for an external set of QMK keymaps with halcyon modules to be defined and compiled. This is useful for users who want to maintain their own keymaps without having to fork the splitkb QMK or vial repository.
 
