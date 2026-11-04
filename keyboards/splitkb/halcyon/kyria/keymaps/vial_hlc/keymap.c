@@ -160,7 +160,7 @@ static void apply_os_settings(os_variant_t detected_os) {
                 tab_modifier                     = KC_LGUI; // Use Cmd for macOS
                 os_detection_config.swap_ctl_gui = true;
                 find_key                         = LGUI(KC_F);
-                replace_key                      = LGUI(LCTL(KC_F));
+                replace_key                      = LGUI(LALT(KC_F));
                 break;
 
             default:
@@ -185,7 +185,7 @@ static void apply_os_settings(os_variant_t detected_os) {
                 tab_modifier                     = KC_LGUI; // Default to Cmd for unknown OS
                 os_detection_config.swap_ctl_gui = true;
                 find_key                         = LGUI(KC_F);
-                replace_key                      = LGUI(LCTL(KC_F));
+                replace_key                      = LGUI(LALT(KC_F));
                 break;
         }
 
@@ -230,28 +230,30 @@ static void draw_windows_icon(void) {
 }
 
 static void draw_apple_icon(void) {
-    const uint16_t x = OS_ICON_X;
-    const uint16_t y = OS_ICON_Y;
-    qp_circle(lcd_surface, x + 11, y + 22, 11, HSV_WHITE, true);
-    qp_circle(lcd_surface, x + 25, y + 22, 11, HSV_WHITE, true);
-    qp_circle(lcd_surface, x + 18, y + 27, 9, HSV_WHITE, true);
-    qp_circle(lcd_surface, x + 18, y + 12, 3, HSV_BLACK, true);
-    qp_circle(lcd_surface, x + 32, y + 19, 5, HSV_BLACK, true);
-    qp_circle(lcd_surface, x + 22, y + 5, 4, HSV_WHITE, true);
+    const uint16_t x = OS_ICON_X + 6;
+    const uint16_t y = OS_ICON_Y + 6;
+    qp_circle(lcd_surface, x + 7, y + 15, 7, HSV_WHITE, true);
+    qp_circle(lcd_surface, x + 16, y + 15, 7, HSV_WHITE, true);
+    qp_circle(lcd_surface, x + 12, y + 18, 6, HSV_WHITE, true);
+    qp_circle(lcd_surface, x + 12, y + 8, 2, HSV_BLACK, true);
+    qp_circle(lcd_surface, x + 22, y + 12, 3, HSV_BLACK, true);
+    qp_circle(lcd_surface, x + 15, y + 3, 3, HSV_WHITE, true);
 }
 
 bool display_module_housekeeping_task_user(bool second_display) {
     static os_variant_t drawn_os    = OS_UNSURE;
     static bool         first_paint = true;
 
-    if (!second_display && (first_paint || drawn_os != current_os)) {
+    const os_variant_t shown_os = current_os != OS_UNSURE ? current_os : detected_host_os();
+
+    if (!second_display && (first_paint || drawn_os != shown_os)) {
         qp_rect(lcd_surface, OS_ICON_X, OS_ICON_Y, OS_ICON_X + OS_ICON_SIZE - 1, OS_ICON_Y + OS_ICON_SIZE - 1, HSV_BLACK, true);
-        if (current_os == OS_WINDOWS) {
+        if (shown_os == OS_WINDOWS) {
             draw_windows_icon();
-        } else if (current_os == OS_MACOS) {
+        } else if (shown_os == OS_MACOS) {
             draw_apple_icon();
         }
-        drawn_os    = current_os;
+        drawn_os    = shown_os;
         first_paint = false;
     }
     return true;
@@ -575,7 +577,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       _______, _______, PREV_W, KC_UP, NEXT_W , GOTOLINE,                                            GO_FORWARD, MS_WHLU, MS_UP,   MS_WHLD,  GO_PREV_ERROR, KC_VOLU,
       _______, START_LINE, KC_LEFT, KC_DOWN, KC_RIGHT, END_LINE,                                     GO_BACK, MS_LEFT, MS_DOWN, MS_RGHT, GO_NEXT_ERROR, KC_VOLD,
       _______, _______, S(KC_F4), KC_F4, KC_F12, _______, _______, KC_SCRL, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, SCREENSHOT, KC_MUTE,
-                                 _______, _______, _______, _______, _______,MS_BTN3, CTL_CLICK, MS_BTN1, MS_BTN2, _______
+                                 _______, _______, MS_BTN1, MS_BTN2, _______,MS_BTN3, CTL_CLICK, MS_BTN1, MS_BTN2, _______
 
 
     ),
