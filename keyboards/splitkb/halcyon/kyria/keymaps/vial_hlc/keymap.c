@@ -525,7 +525,16 @@ bool get_chordal_hold(uint16_t tap_hold_keycode, keyrecord_t *tap_hold_record, u
     if (IS_QK_LAYER_TAP(tap_hold_keycode)) {
         return true;
     }
-    return get_chordal_hold_default(tap_hold_record, other_record);
+    switch (other_keycode) {
+        case KC_MINS:
+        case KC_DOT:
+        case KC_SLSH:
+        case KC_RBRC:
+        case CTL_QUOT:
+            return true;
+        default:
+            return get_chordal_hold_default(tap_hold_record, other_record);
+    }
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
