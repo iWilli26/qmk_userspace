@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/william/Documents/dev/qmk_userspace/keyboards/splitkb/halcyon/kyria/keymaps/vial_hlc",
+      "program": "/Users/william/Documents/dev/qmk_userspace/keyboards/splitkb/halcyon/kyria/keymaps/vial_hlc/build/Debug/outDebug"
+    }
+  ]
+}

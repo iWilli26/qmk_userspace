@@ -7,18 +7,10 @@
 #include "print.h"
 #include "process_unicode.h"
 #include "keycodes.h"
-#define MASTER_LEFT
-
-// Features expected enabled in rules.mk:
-// ENCODER_MAP_ENABLE = yes
-// CAPS_WORD_ENABLE = yes
-// OS_DETECTION_ENABLE = yes
-// CONSOLE_ENABLE = yes
-// TAP_DANCE_ENABLE = yes
-// COMBO_ENABLE = yes
-
-#define OS_DETECTION_DEBOUNCE 500
-#define OS_DETECTION_KEYBOARD_RESET
+#ifdef HLC_TFT_DISPLAY
+#    include "halcyon.h"
+#    include "hlc_tft_display/hlc_tft_display.h"
+#endif
 
 enum layers { _COLEMAK_DH = 0, _SYM, _NAV, _SELECT, _FUNCTION, _LOL, _GAME, _STS };
 
@@ -34,7 +26,7 @@ enum layers { _COLEMAK_DH = 0, _SYM, _NAV, _SELECT, _FUNCTION, _LOL, _GAME, _STS
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT MT(MOD_LALT, KC_ENT)
 
-enum custom_keycodes { TEST = SAFE_RANGE, STAB_NEXT, STAB_PREV, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, GUI_SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE, GOTOLINE, GO_BACK, GO_FORWARD, GO_NEXT_ERROR, GO_PREV_ERROR, SCREENSHOT };
+enum custom_keycodes { TEST = SAFE_RANGE, STAB_NEXT, STAB_PREV, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, GUI_SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE, GOTOLINE, GO_BACK, GO_FORWARD, GO_NEXT_ERROR, GO_PREV_ERROR, SCREENSHOT, FIND, REPLACE, OS_SWAP };
 
 typedef struct {
     bool swap_ctl_gui;
@@ -65,6 +57,9 @@ static uint16_t go_next_error      = LALT(KC_F8);
 static uint16_t go_prev_error      = LALT(S(KC_F8));
 static uint16_t screenshot_key     = RGUI(S(KC_S));
 
+static uint16_t find_key       = C(KC_F);
+static uint16_t replace_key    = C(KC_H);
+
 static uint16_t end_line_key   = KC_END;
 static uint16_t start_line_key = KC_HOME;
 
@@ -72,7 +67,10 @@ static uint16_t start_line_key = KC_HOME;
 static uint16_t tab_modifier = KC_LALT; // Alt for Windows/Linux, Cmd for macOS
 
 // NOTE: The fall-through behavior in this handler is intentional per user comment.
-bool process_detected_host_os_user(os_variant_t detected_os) {
+static os_variant_t current_os = OS_UNSURE;
+
+static void apply_os_settings(os_variant_t detected_os) {
+    current_os = detected_os;
     if (is_keyboard_master()) {
         os_detection_config_t os_detection_config = {
             .swap_ctl_gui = false,
@@ -104,11 +102,13 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 end_line_key       = KC_END;
                 start_line_key     = KC_HOME;
                 goto_line_key      = LCTL(KC_G);
-                go_back            = LALT(KC_MINS);
-                go_forward         = LALT(S(KC_MINS));
+                go_back            = LALT(KC_LEFT);
+                go_forward         = LALT(KC_RGHT);
                 go_next_error      = LALT(KC_F8);
                 go_prev_error      = LALT(S(KC_F8));
                 tab_modifier       = KC_LALT; // Use Alt for Windows
+                find_key           = LCTL(KC_F);
+                replace_key        = LCTL(KC_H);
                 break;
             case OS_LINUX:
                 xprintf("Linux Detected\n");
@@ -132,6 +132,8 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 go_back            = LCTL(LALT(KC_MINUS));
                 go_forward         = LCTL(S(KC_MINUS));
                 tab_modifier       = KC_LALT; // Use Alt for Linux
+                find_key           = LCTL(KC_F);
+                replace_key        = LCTL(KC_H);
                 break;
             case OS_MACOS:
                 xprintf("MacOS Detected\n");
@@ -157,6 +159,8 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 screenshot_key                   = LGUI(S(KC_5));
                 tab_modifier                     = KC_LGUI; // Use Cmd for macOS
                 os_detection_config.swap_ctl_gui = true;
+                find_key                         = LGUI(KC_F);
+                replace_key                      = LGUI(LCTL(KC_F));
                 break;
 
             default:
@@ -180,6 +184,8 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
                 goto_line_key                    = LGUI(KC_G);
                 tab_modifier                     = KC_LGUI; // Default to Cmd for unknown OS
                 os_detection_config.swap_ctl_gui = true;
+                find_key                         = LGUI(KC_F);
+                replace_key                      = LGUI(LCTL(KC_F));
                 break;
         }
 
@@ -198,9 +204,60 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
         xprintf("Using UNICODE_COMMON with mode %u\n", os_detection_config.unicode_input_mode);
 #endif
     }
+}
 
+bool process_detected_host_os_user(os_variant_t detected_os) {
+    apply_os_settings(detected_os);
     return true;
 }
+
+#ifdef HLC_TFT_DISPLAY
+#    define OS_ICON_SIZE 36
+#    define OS_ICON_X (LCD_WIDTH - OS_ICON_SIZE - 5)
+#    define OS_ICON_Y 5
+#    define HSV_WINDOWS_BLUE 147, 255, 255
+
+static void draw_windows_icon(void) {
+    const uint16_t pane = 17;
+    const uint16_t step = pane + 2;
+    for (uint16_t row = 0; row < 2; row++) {
+        for (uint16_t col = 0; col < 2; col++) {
+            uint16_t left = OS_ICON_X + col * step;
+            uint16_t top  = OS_ICON_Y + row * step;
+            qp_rect(lcd_surface, left, top, left + pane - 1, top + pane - 1, HSV_WINDOWS_BLUE, true);
+        }
+    }
+}
+
+static void draw_apple_icon(void) {
+    const uint16_t x = OS_ICON_X;
+    const uint16_t y = OS_ICON_Y;
+    qp_circle(lcd_surface, x + 11, y + 22, 11, HSV_WHITE, true);
+    qp_circle(lcd_surface, x + 25, y + 22, 11, HSV_WHITE, true);
+    qp_circle(lcd_surface, x + 18, y + 27, 9, HSV_WHITE, true);
+    qp_circle(lcd_surface, x + 18, y + 12, 3, HSV_BLACK, true);
+    qp_circle(lcd_surface, x + 32, y + 19, 5, HSV_BLACK, true);
+    qp_circle(lcd_surface, x + 22, y + 5, 4, HSV_WHITE, true);
+}
+
+bool display_module_housekeeping_task_user(bool second_display) {
+    static os_variant_t drawn_os    = OS_UNSURE;
+    static bool         first_paint = true;
+
+    if (!second_display && (first_paint || drawn_os != current_os)) {
+        qp_rect(lcd_surface, OS_ICON_X, OS_ICON_Y, OS_ICON_X + OS_ICON_SIZE - 1, OS_ICON_Y + OS_ICON_SIZE - 1, HSV_BLACK, true);
+        if (current_os == OS_WINDOWS) {
+            draw_windows_icon();
+        } else if (current_os == OS_MACOS) {
+            draw_apple_icon();
+        }
+        drawn_os    = current_os;
+        first_paint = false;
+    }
+    return true;
+}
+#endif
+
 static bool     is_sticky_tab_active = false;
 static uint16_t sticky_tab_timer     = 0;
 
@@ -348,6 +405,21 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 tap_code16(screenshot_key);
             }
             return false;
+        case OS_SWAP:
+            if (record->event.pressed) {
+                apply_os_settings(current_os == OS_MACOS ? OS_WINDOWS : OS_MACOS);
+            }
+            return false;
+        case FIND:
+            if (record->event.pressed) {
+                tap_code16(find_key);
+            }
+            return false;
+        case REPLACE:
+            if (record->event.pressed) {
+                tap_code16(replace_key);
+            }
+            return false;
         case CTL_CLICK: {
             if (record->event.pressed) {
                 register_code(click_modifier);   // Press and hold Ctrl/Cmd based on OS
@@ -356,14 +428,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 wait_ms(10);                     // Small delay before releasing
                 unregister_code(click_modifier); // Release Ctrl/Cmd
             }
-            break;
+            return false;
         }
         default:
             // Any other key pressed → stop sticky tab
             if (is_sticky_tab_active && record->event.pressed) {
                 unregister_code(tab_modifier);
                 is_sticky_tab_active = false;
-                return false;
             }
             return true;
     }
@@ -478,13 +549,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                        |GUI CTL|      | Enter| Space  | Tab  |                                       |      | BkSpc|      |      |      |
  *                        `----------------------------------'                                       `----------------------------------
  */
-    [_COLEMAK_DH] = LAYOUT_split_3x6_5_hlc(
-    KC_ESCAPE, KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                                             KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_MINS, KC_BSPC,
-     KC_LSFT , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   LSFT_T(KC_T) ,   KC_G ,                                                 KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , KC_MINS,
-     KC_LCTL , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , CW_TOGG, KC_CAPS,                                                     FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , DOT_DASH, KC_DOT ,KC_SLSH, CTL_QUOT,
-                          TO(_GAME) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  STAB_NEXT           ,KC_RALT , LT(_SELECT, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, TO(_LOL),
-
-         KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
+    [_COLEMAK_DH] = LAYOUT(
+    REPLACE  , KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                                           KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_MINS, KC_BSPC,
+     FIND    , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   LSFT_T(KC_T) ,   KC_G ,                                               KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , KC_MINS,
+     OS_SWAP , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , CW_TOGG, KC_CAPS,                                                 FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , DOT_DASH, KC_DOT ,KC_SLSH, CTL_QUOT,
+                          TO(_GAME) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  STAB_NEXT           ,KC_RALT , LT(_SELECT, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, TO(_LOL)
     ), 
 
 
@@ -502,13 +571,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                        |      |      |      |      |      |  |      |      |      |      |      |
  *                            ----------------------------------  ----------------------------------
  */
-    [_NAV] = LAYOUT_split_3x6_5_hlc(
+    [_NAV] = LAYOUT(
       _______, _______, PREV_W, KC_UP, NEXT_W , GOTOLINE,                                            GO_FORWARD, MS_WHLU, MS_UP,   MS_WHLD,  GO_PREV_ERROR, KC_VOLU,
       _______, START_LINE, KC_LEFT, KC_DOWN, KC_RIGHT, END_LINE,                                     GO_BACK, MS_LEFT, MS_DOWN, MS_RGHT, GO_NEXT_ERROR, KC_VOLD,
       _______, _______, S(KC_F4), KC_F4, KC_F12, _______, _______, KC_SCRL, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, SCREENSHOT, KC_MUTE,
-                                 _______, _______, _______, _______, _______,MS_BTN3, CTL_CLICK, MS_BTN1, MS_BTN2, _______,
-
-        KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
+                                 _______, _______, _______, _______, _______,MS_BTN3, CTL_CLICK, MS_BTN1, MS_BTN2, _______
 
 
     ),
@@ -527,23 +594,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                        |      |      |   [  |      |   ]  |  |      |      |      |      |      |
  *                        `----------------------------------'  `----------------------------------'
  */
-    [_SYM] = LAYOUT_split_3x6_5_hlc(
+    [_SYM] = LAYOUT(
       KC_GRV ,   KC_AT ,   S(KC_3) ,   S(KC_9) ,   S(KC_0) ,   KC_DLR ,                                       KC_PPLS ,   KC_7 ,   KC_8 ,   KC_9 ,   KC_PAST , KC_EQL ,
      KC_LSFT , KC_EXLM ,  KC_CIRC     , KC_QUOT,  KC_GRV    , KC_SCLN,                                     KC_CIRC,    KC_4,    KC_5,    KC_6, KC_SLSH, KC_ENT,
      KC_NUBS , KC_AMPR , KC_PERC    , KC_QUES, KC_EXLM   , KC_BSLS, _______ , _______, _______, _______, KC_0,       KC_1,    KC_2,    KC_3, KC_DOT, KC_QUES,
-                                       _______, KC_LBRC, KC_SPC , KC_RBRC,_______, _______, _______, _______, _______, _______,
-
-                                            KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
+                                       _______, KC_LBRC, KC_SPC , KC_RBRC,_______, _______, _______, _______, _______, _______
 
     ),
 
-        [_SELECT] = LAYOUT_split_3x6_5_hlc(
+        [_SELECT] = LAYOUT(
      KC_TAB  , COPY ,      S(KC_LEFT)  ,   S(KC_UP)      ,   S(KC_RIGHT)    , SELECT_ALL   ,                                              _______,  PREV_W, KC_UP, NEXT_W , _______,_______, 
      KC_LSFT , PASTE ,  SLC_PREV_WORD   ,  S(KC_DOWN)     ,   SLC_NEXT_WORD , UNDO   ,                                                  START_LINE, KC_LEFT, KC_DOWN, KC_RIGHT, END_LINE,KC_H,
      CTL_ESC , CUT ,    SLC_START_LINE ,  KC_C  ,           SLC_END_LINE ,      REDO ,       REDO,        KC_CAPS  , REDO  ,           KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
-                                ADJUST , KC_LGUI, ALT_ENT, KC_SPC , NAV     ,                                                            SYM    ,KC_ENT ,KC_BSPC, KC_RGUI, KC_APP,
-
-                                     KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
+                                ADJUST , KC_LGUI, ALT_ENT, KC_SPC , NAV     ,                                                            SYM    ,KC_ENT ,KC_BSPC, KC_RGUI, KC_APP
 
     ), 
 
@@ -561,13 +624,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                        |      |      |      |      |      |  |      |      |      |      |      |
  *                        `----------------------------------'  `----------------------------------'
  */
-    [_FUNCTION] = LAYOUT_split_3x6_5_hlc(
+    [_FUNCTION] = LAYOUT(
       BL_TOGG,  KC_F9 ,  KC_F10,  KC_F11,  KC_F12, UG_NEXT,                                     _______, _______, _______, _______, _______, _______,
       BL_STEP,  KC_F5 ,  KC_F6 ,  KC_F7 ,  KC_F8 , UG_PREV,                                     _______, KC_RSFT, KC_RCTL, KC_LALT, KC_RGUI, _______,
       _______,  KC_F1 ,  KC_F2 ,  KC_F3 ,  KC_F4 , _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
-                                 _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
-
-                                      KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
+                                 _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
 
     ),
 
@@ -588,13 +649,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * | MUTE | ____ | _____ | ____ | ____ |                                              | MUTE | ____ | _____ | ____ | ____ |
  * `-----------------------------------'                                              `-----------------------------------'
  */
-    [_LOL] = LAYOUT_split_3x6_5_hlc(
+    [_LOL] = LAYOUT(
      KC_ESCAPE  ,KC_ESCAPE, KC_1 ,  KC_2   ,  KC_3  ,   KC_4  ,                                        KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC,
      KC_LSFT , KC_TAB, KC_Q ,  KC_W   ,  KC_E  ,   KC_R  ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
      KC_LCTL , KC_LSFT,KC_G ,  KC_B   ,  KC_D  ,   KC_F  , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
-                                TO(_COLEMAK_DH), LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) ,  KC_SPACE,  STAB_NEXT           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, TO(_COLEMAK_DH),
-
-     KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
+                                TO(_COLEMAK_DH), LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) ,  KC_SPACE,  STAB_NEXT           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, TO(_COLEMAK_DH)
     ),
 
 
@@ -615,23 +674,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                        |      |      |      |      |      |  |      |      |      |      |      |
  *                        `----------------------------------'  `----------------------------------'
  */
-    [_GAME] = LAYOUT_split_3x6_5_hlc(
+    [_GAME] = LAYOUT(
      KC_ESCAPE  , KC_LALT   ,  KC_Q   ,  KC_W  ,   KC_E ,   KC_R ,                                          KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC, KC_T , 
      KC_LSFT , KC_TAB ,  KC_A   ,  KC_S  ,   KC_D ,   KC_F ,                                         KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT, KC_T , 
      KC_LCTL , KC_LSFT ,  KC_Z   ,  KC_X  ,   KC_C ,   KC_V , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT, KC_T , 
-                                TO(_STS), TD(TD_1) , TD(TD_3) , KC_SPACE,  STAB_NEXT           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
-
-     KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
+                                TO(_STS), TD(TD_1) , TD(TD_3) , KC_SPACE,  STAB_NEXT           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP
 
     ),
 
-    [_STS] = LAYOUT_split_3x6_5_hlc(
+    [_STS] = LAYOUT(
      KC_D  , KC_E   ,  KC_8   ,  KC_8  ,   KC_9 ,   KC_J ,                                          KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC, KC_T , 
      KC_A , KC_B ,  KC_4   ,  KC_5  ,   KC_6 ,   KC_E ,                                         KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT, KC_T , 
      KC_5 , KC_6 ,  KC_1   ,  KC_2  ,   KC_3 ,   KC_4 , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT, KC_T , 
-                                TO(_COLEMAK_DH), KC_L , KC_SPACE , KC_LSFT,  STAB_NEXT           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP,
-
-     KC_MUTE, KC_NO,  KC_NO, KC_NO, KC_NO,                                                                KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
+                                TO(_COLEMAK_DH), KC_L , KC_SPACE , KC_LSFT,  STAB_NEXT           ,KC_RALT , LT(_NAV, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, KC_APP
 
     ),
 
@@ -649,7 +704,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 //  *                        |      |      |      |      |      |  |      |      |      |      |      |
 //  *                        `----------------------------------'  `----------------------------------'
 //  */
-//     [_LAYERINDEX] = LAYOUT_split_3x6_5_hlc(
+//     [_LAYERINDEX] = LAYOUT(
 //       _______, _______, _______, _______, _______, _______,                                     _______, _______, _______, _______, _______, _______,
 //       _______, _______, _______, _______, _______, _______,                                     _______, _______, _______, _______, _______, _______,
 //       _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
