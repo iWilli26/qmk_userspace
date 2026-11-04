@@ -8,3 +8,7 @@ CONSOLE_ENABLE = yes
 TAP_DANCE_ENABLE = yes
 COMBO_ENABLE = yes
 MOUSEKEY_ENABLE = yes
+
+ifdef HLC_TFT_DISPLAY
+    SRC += graphics/din40.qff.c
+endif

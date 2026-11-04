@@ -214,7 +214,8 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
 #ifdef HLC_TFT_DISPLAY
 #    define OS_ICON_SIZE 36
 #    define OS_ICON_X (LCD_WIDTH - OS_ICON_SIZE - 5)
-#    define OS_ICON_Y (LCD_HEIGHT - OS_ICON_SIZE - 5)
+static uint16_t os_icon_y = 0;
+#    define OS_ICON_Y os_icon_y
 #    define HSV_WINDOWS_BLUE 147, 255, 255
 
 static void draw_windows_icon(void) {
@@ -261,6 +262,25 @@ bool display_module_housekeeping_task_user(bool second_display) {
 
 #    include "hlc_tft_display/graphics/fonts/Retron2000-27.qff.h"
 #    include "hlc_tft_display/graphics/fonts/Retron2000-underline-27.qff.h"
+#    include "graphics/din40.qff.h"
+
+#    define HSV_MODS 145, 150, 255
+
+static painter_font_handle_t font           = NULL;
+static painter_font_handle_t font_underline = NULL;
+static painter_font_handle_t font_layer     = NULL;
+static uint16_t              layer_y        = 0;
+static uint16_t              caps_y         = 0;
+
+bool module_post_init_user(void) {
+    font           = qp_load_font_mem(font_Retron2000_27);
+    font_underline = qp_load_font_mem(font_Retron2000_underline_27);
+    font_layer     = qp_load_font_mem(font_din40);
+    layer_y        = LCD_HEIGHT - font_layer->line_height - 5;
+    caps_y         = layer_y - font->line_height - 6;
+    os_icon_y      = layer_y - OS_ICON_SIZE - 5;
+    return true;
+}
 
 typedef struct {
     uint16_t    code;
@@ -422,7 +442,7 @@ static uint16_t resolve_output(uint16_t keycode, keyrecord_t *record, uint8_t *m
     }
 }
 
-void post_process_record_user(uint16_t keycode, keyrecord_t *record) {
+static void capture_output(uint16_t keycode, keyrecord_t *record) {
     if (!debug_output || !record->event.pressed) {
         return;
     }
@@ -450,22 +470,17 @@ static void clear_line(uint16_t y, uint16_t height) {
 }
 
 void update_display(void) {
-    static painter_font_handle_t font           = NULL;
-    static painter_font_handle_t font_underline = NULL;
-    static uint8_t               drawn_layer    = UINT8_MAX;
-    static int8_t                drawn_caps     = -1;
-    static bool                  drawn_debug    = false;
+    static uint8_t drawn_layer = UINT8_MAX;
+    static int8_t  drawn_caps  = -1;
+    static bool    drawn_debug = false;
 
     if (font == NULL) {
-        font           = qp_load_font_mem(font_Retron2000_27);
-        font_underline = qp_load_font_mem(font_Retron2000_underline_27);
+        return;
     }
 
-    const uint16_t height  = font->line_height;
-    const uint16_t layer_y = 5;
-    const uint16_t mods_y  = layer_y + height + 16;
-    const uint16_t key_y   = mods_y + height + 4;
-    const uint16_t caps_y  = LCD_HEIGHT - height - 5;
+    const uint16_t height = font->line_height;
+    const uint16_t mods_y = 5;
+    const uint16_t key_y  = mods_y + height + 4;
 
     if (!debug_output && drawn_debug) {
         clear_line(mods_y, height);
@@ -481,21 +496,21 @@ void update_display(void) {
         }
         clear_line(mods_y, height);
         clear_line(key_y, height);
-        qp_drawtext_recolor(lcd_surface, 5, mods_y, font, mods_text, HSV_SPLITKB, HSV_BLACK);
+        qp_drawtext_recolor(lcd_surface, 5, mods_y, font, mods_text, HSV_MODS, HSV_BLACK);
         qp_drawtext_recolor(lcd_surface, 5, key_y, font, output_key, HSV_WHITE, HSV_BLACK);
         output_dirty = false;
     }
 
     const uint8_t layer = get_highest_layer(layer_state | default_layer_state);
     if (layer != drawn_layer && layer < ARRAY_SIZE(layer_names)) {
-        clear_line(layer_y, height);
-        qp_drawtext_recolor(lcd_surface, 5, layer_y, font, layer_names[layer], layer_colors[layer][0], layer_colors[layer][1], layer_colors[layer][2], HSV_BLACK);
+        clear_line(layer_y, font_layer->line_height);
+        qp_drawtext_recolor(lcd_surface, 5, layer_y, font_layer, layer_names[layer], layer_colors[layer][0], layer_colors[layer][1], layer_colors[layer][2], HSV_BLACK);
         drawn_layer = layer;
     }
 
-    const bool caps = host_keyboard_led_state().caps_lock;
+    const bool caps = host_keyboard_led_state().caps_lock || is_caps_word_on();
     if ((int8_t)caps != drawn_caps) {
-        clear_line(caps_y, height);
+        qp_rect(lcd_surface, 0, caps_y, OS_ICON_X - 1, caps_y + height, HSV_BLACK, true);
         if (caps) {
             qp_drawtext_recolor(lcd_surface, 5, caps_y, font_underline, "Caps", HSV_CAPS_ON, HSV_BLACK);
         } else {
@@ -539,6 +554,9 @@ bool get_chordal_hold(uint16_t tap_hold_keycode, keyrecord_t *tap_hold_record, u
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     static uint16_t my_hash_timer;
+#ifdef HLC_TFT_DISPLAY
+    capture_output(keycode, record);
+#endif
     switch (keycode) {
         case STAB_NEXT:
             if (record->event.pressed) {
