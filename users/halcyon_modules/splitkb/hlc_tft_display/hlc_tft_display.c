@@ -178,7 +178,7 @@ void add_cell_cluster() {
     }
 }
 
-void update_display(void) {
+__attribute__((weak)) void update_display(void) {
     static bool first_run_led   = false;
     static bool first_run_layer = false;
 

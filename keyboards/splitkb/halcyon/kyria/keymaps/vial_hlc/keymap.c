@@ -26,7 +26,7 @@ enum layers { _COLEMAK_DH = 0, _SYM, _NAV, _SELECT, _FUNCTION, _LOL, _GAME, _STS
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT MT(MOD_LALT, KC_ENT)
 
-enum custom_keycodes { TEST = SAFE_RANGE, STAB_NEXT, STAB_PREV, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, GUI_SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE, GOTOLINE, GO_BACK, GO_FORWARD, GO_NEXT_ERROR, GO_PREV_ERROR, SCREENSHOT, FIND, REPLACE, OS_SWAP };
+enum custom_keycodes { TEST = SAFE_RANGE, STAB_NEXT, STAB_PREV, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, GUI_SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE, GOTOLINE, GO_BACK, GO_FORWARD, GO_NEXT_ERROR, GO_PREV_ERROR, SCREENSHOT, FIND, REPLACE, OS_SWAP, DBG_OUT };
 
 typedef struct {
     bool swap_ctl_gui;
@@ -214,7 +214,7 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
 #ifdef HLC_TFT_DISPLAY
 #    define OS_ICON_SIZE 36
 #    define OS_ICON_X (LCD_WIDTH - OS_ICON_SIZE - 5)
-#    define OS_ICON_Y 5
+#    define OS_ICON_Y (LCD_HEIGHT - OS_ICON_SIZE - 5)
 #    define HSV_WINDOWS_BLUE 147, 255, 255
 
 static void draw_windows_icon(void) {
@@ -257,6 +257,252 @@ bool display_module_housekeeping_task_user(bool second_display) {
         first_paint = false;
     }
     return true;
+}
+
+#    include "hlc_tft_display/graphics/fonts/Retron2000-27.qff.h"
+#    include "hlc_tft_display/graphics/fonts/Retron2000-underline-27.qff.h"
+
+typedef struct {
+    uint16_t    code;
+    const char *label;
+} key_label_t;
+
+static const key_label_t key_labels[] = {
+    {KC_ENT, "Ent"},     {KC_ESC, "Esc"},      {KC_BSPC, "Bksp"},   {KC_TAB, "Tab"},      {KC_SPC, "Spc"},      {KC_MINS, "-"},       {KC_EQL, "="},        {KC_LBRC, "["},      {KC_RBRC, "]"},     {KC_BSLS, "\\"},    {KC_NUBS, "\\"},   {KC_SCLN, ";"},    {KC_QUOT, "'"},      {KC_GRV, "`"},      {KC_COMM, ","},    {KC_DOT, "."},     {KC_SLSH, "/"},
+    {KC_CAPS, "Caps"},   {KC_DEL, "Del"},      {KC_INS, "Ins"},     {KC_HOME, "Home"},    {KC_END, "End"},      {KC_PGUP, "PgUp"},    {KC_PGDN, "PgDn"},    {KC_RGHT, "Right"},  {KC_LEFT, "Left"},  {KC_DOWN, "Down"},  {KC_UP, "Up"},     {KC_APP, "Menu"},  {KC_PSCR, "PrtSc"},  {KC_SCRL, "ScrLk"}, {KC_PAUS, "Pause"},
+    {KC_MUTE, "Mute"},   {KC_VOLU, "Vol+"},   {KC_VOLD, "Vol-"},   {KC_MPRV, "Prev"},    {KC_MPLY, "Play"},    {KC_MNXT, "Next"},    {KC_PPLS, "+"},       {KC_PAST, "*"},      {MS_BTN1, "LClick"}, {MS_BTN2, "RClick"}, {MS_BTN3, "MClick"}, {MS_UP, "Mouse"}, {MS_DOWN, "Mouse"}, {MS_LEFT, "Mouse"}, {MS_RGHT, "Mouse"}, {MS_WHLU, "WhlUp"}, {MS_WHLD, "WhlDn"},
+    {CW_TOGG, "CapsWd"}, {KC_EXLM, "!"},       {KC_AT, "@"},        {KC_HASH, "#"},       {KC_DLR, "$"},        {KC_PERC, "%"},       {KC_CIRC, "^"},       {KC_AMPR, "&"},      {KC_LPRN, "("},     {KC_RPRN, ")"},     {KC_UNDS, "_"},    {KC_LCBR, "{"},    {KC_RCBR, "}"},      {KC_PIPE, "|"},     {KC_COLN, ":"},    {KC_DQUO, "\""},   {KC_LABK, "<"},      {KC_RABK, ">"},     {KC_QUES, "?"},    {KC_TILD, "~"},
+};
+
+#    define OUTPUT_IGNORE 0xFFFF
+
+static char    output_key[12] = "";
+static uint8_t output_mods    = 0;
+static bool    output_dirty   = true;
+static bool    debug_output   = false;
+
+static void toggle_debug_output(void) {
+    debug_output  = !debug_output;
+    output_key[0] = '\0';
+    output_mods   = 0;
+    output_dirty  = true;
+}
+
+static const char *find_label(uint16_t code) {
+    for (size_t i = 0; i < ARRAY_SIZE(key_labels); i++) {
+        if (key_labels[i].code == code) {
+            return key_labels[i].label;
+        }
+    }
+    return NULL;
+}
+
+static uint8_t unpack_mods(uint8_t packed) {
+    return (packed & 0x10) ? (packed & 0x0F) << 4 : packed & 0x0F;
+}
+
+static void append_label(char *out, size_t size, const char *label, const char *separator) {
+    if (out[0] != '\0') {
+        strncat(out, separator, size - strlen(out) - 1);
+    }
+    strncat(out, label, size - strlen(out) - 1);
+}
+
+static void build_mods_text(uint8_t mods, bool spaced, char *out, size_t size) {
+    const char *separator = spaced ? " " : "";
+    out[0]                = '\0';
+    if (mods & MOD_MASK_CTRL) append_label(out, size, "Ctl", separator);
+    if (mods & MOD_MASK_ALT) append_label(out, size, "Alt", separator);
+    if (mods & MOD_MASK_GUI) append_label(out, size, current_os == OS_MACOS ? "Cmd" : "Win", separator);
+    if (mods & MOD_MASK_SHIFT) append_label(out, size, "Sft", separator);
+}
+
+static void show_output(uint16_t code, uint8_t mods) {
+    char        key[sizeof(output_key)] = "";
+    const char *label                   = find_label(code);
+
+    if (label == NULL && code <= QK_MODS_MAX) {
+        mods |= unpack_mods(QK_MODS_GET_MODS(code));
+        code  = QK_MODS_GET_BASIC_KEYCODE(code);
+        label = find_label(code);
+    }
+
+    if (label != NULL) {
+        snprintf(key, sizeof(key), "%s", label);
+    } else if (code >= KC_A && code <= KC_Z) {
+        const bool shifted = (mods & MOD_MASK_SHIFT) != 0;
+        const bool others  = (mods & ~MOD_MASK_SHIFT) != 0;
+        const bool caps    = host_keyboard_led_state().caps_lock || is_caps_word_on();
+        const bool upper   = others || (shifted != caps);
+        key[0]             = (upper ? 'A' : 'a') + (code - KC_A);
+        if (!others) {
+            mods &= ~MOD_MASK_SHIFT;
+        }
+    } else if (code >= KC_1 && code <= KC_0) {
+        key[0] = code == KC_0 ? '0' : '1' + (code - KC_1);
+    } else if (code >= KC_F1 && code <= KC_F12) {
+        snprintf(key, sizeof(key), "F%u", (unsigned)(code - KC_F1 + 1));
+    } else if (code >= KC_LCTL && code <= KC_RGUI) {
+        mods |= MOD_BIT(code);
+    } else if (code != KC_NO) {
+        return;
+    }
+
+    snprintf(output_key, sizeof(output_key), "%s", key);
+    output_mods  = mods;
+    output_dirty = true;
+}
+
+static uint16_t resolve_output(uint16_t keycode, keyrecord_t *record, uint8_t *mods) {
+    if (IS_QK_MOD_TAP(keycode)) {
+        if (record->tap.count == 0) {
+            *mods |= unpack_mods(QK_MOD_TAP_GET_MODS(keycode));
+            return KC_NO;
+        }
+        return QK_MOD_TAP_GET_TAP_KEYCODE(keycode);
+    }
+    if (IS_QK_LAYER_TAP(keycode)) {
+        return record->tap.count == 0 ? OUTPUT_IGNORE : QK_LAYER_TAP_GET_TAP_KEYCODE(keycode);
+    }
+    switch (keycode) {
+        case FIND:
+            return find_key;
+        case REPLACE:
+            return replace_key;
+        case UNDO:
+            return undo_key;
+        case REDO:
+            return redo_key;
+        case CUT:
+            return cut_key;
+        case COPY:
+            return copy_key;
+        case PASTE:
+            return paste_key;
+        case SELECT_ALL:
+            return select_all_key;
+        case GUI_SAVE:
+            return save_key;
+        case PREV_W:
+            return prev_word_key;
+        case NEXT_W:
+            return next_word_key;
+        case END_LINE:
+            return end_line_key;
+        case START_LINE:
+            return start_line_key;
+        case SLC_NEXT_WORD:
+            return slc_next_word_key;
+        case SLC_PREV_WORD:
+            return slc_prev_word_key;
+        case SLC_END_LINE:
+            return slc_end_line_key;
+        case SLC_START_LINE:
+            return slc_start_line_key;
+        case GOTOLINE:
+            return goto_line_key;
+        case GO_BACK:
+            return go_back;
+        case GO_FORWARD:
+            return go_forward;
+        case GO_NEXT_ERROR:
+            return go_next_error;
+        case GO_PREV_ERROR:
+            return go_prev_error;
+        case SCREENSHOT:
+            return screenshot_key;
+        case STAB_NEXT:
+            *mods |= MOD_BIT(tab_modifier);
+            return KC_TAB;
+        case CTL_CLICK:
+            *mods |= MOD_BIT(click_modifier);
+            return MS_BTN1;
+        default:
+            return keycode;
+    }
+}
+
+void post_process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (!debug_output || !record->event.pressed) {
+        return;
+    }
+    if (keycode == OS_SWAP) {
+        snprintf(output_key, sizeof(output_key), "%s", current_os == OS_MACOS ? "macOS" : "Windows");
+        output_mods  = 0;
+        output_dirty = true;
+        return;
+    }
+    uint8_t  mods = get_mods() | get_weak_mods() | get_oneshot_mods();
+    uint16_t code = resolve_output(keycode, record, &mods);
+    if (code != OUTPUT_IGNORE) {
+        show_output(code, mods);
+    }
+}
+
+static const char *const layer_names[] = {"BASE", "SYM", "NAV", "SELECT", "FUNCTION", "LOL", "GAME", "STS"};
+
+static const uint8_t layer_colors[][3] = {
+    {HSV_LAYER_0}, {HSV_LAYER_1}, {HSV_LAYER_2}, {HSV_LAYER_3}, {HSV_LAYER_4}, {HSV_LAYER_5}, {HSV_LAYER_6}, {HSV_LAYER_7},
+};
+
+static void clear_line(uint16_t y, uint16_t height) {
+    qp_rect(lcd_surface, 0, y, LCD_WIDTH - 1, y + height, HSV_BLACK, true);
+}
+
+void update_display(void) {
+    static painter_font_handle_t font           = NULL;
+    static painter_font_handle_t font_underline = NULL;
+    static uint8_t               drawn_layer    = UINT8_MAX;
+    static int8_t                drawn_caps     = -1;
+    static bool                  drawn_debug    = false;
+
+    if (font == NULL) {
+        font           = qp_load_font_mem(font_Retron2000_27);
+        font_underline = qp_load_font_mem(font_Retron2000_underline_27);
+    }
+
+    const uint16_t height  = font->line_height;
+    const uint16_t layer_y = 5;
+    const uint16_t mods_y  = layer_y + height + 16;
+    const uint16_t key_y   = mods_y + height + 4;
+    const uint16_t caps_y  = LCD_HEIGHT - height - 5;
+
+    if (!debug_output && drawn_debug) {
+        clear_line(mods_y, height);
+        clear_line(key_y, height);
+    }
+    drawn_debug = debug_output;
+
+    if (debug_output && output_dirty) {
+        char mods_text[24];
+        build_mods_text(output_mods, true, mods_text, sizeof(mods_text));
+        if (qp_textwidth(font, mods_text) > LCD_WIDTH - 10) {
+            build_mods_text(output_mods, false, mods_text, sizeof(mods_text));
+        }
+        clear_line(mods_y, height);
+        clear_line(key_y, height);
+        qp_drawtext_recolor(lcd_surface, 5, mods_y, font, mods_text, HSV_SPLITKB, HSV_BLACK);
+        qp_drawtext_recolor(lcd_surface, 5, key_y, font, output_key, HSV_WHITE, HSV_BLACK);
+        output_dirty = false;
+    }
+
+    const uint8_t layer = get_highest_layer(layer_state | default_layer_state);
+    if (layer != drawn_layer && layer < ARRAY_SIZE(layer_names)) {
+        clear_line(layer_y, height);
+        qp_drawtext_recolor(lcd_surface, 5, layer_y, font, layer_names[layer], layer_colors[layer][0], layer_colors[layer][1], layer_colors[layer][2], HSV_BLACK);
+        drawn_layer = layer;
+    }
+
+    const bool caps = host_keyboard_led_state().caps_lock;
+    if ((int8_t)caps != drawn_caps) {
+        clear_line(caps_y, height);
+        if (caps) {
+            qp_drawtext_recolor(lcd_surface, 5, caps_y, font_underline, "Caps", HSV_CAPS_ON, HSV_BLACK);
+        } else {
+            qp_drawtext_recolor(lcd_surface, 5, caps_y, font, "Caps", HSV_CAPS_OFF, HSV_BLACK);
+        }
+        drawn_caps = caps;
+    }
 }
 #endif
 
@@ -427,6 +673,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case OS_SWAP:
             if (record->event.pressed) {
                 apply_os_settings(current_os == OS_MACOS ? OS_WINDOWS : OS_MACOS);
+            }
+            return false;
+        case DBG_OUT:
+            if (record->event.pressed) {
+#ifdef HLC_TFT_DISPLAY
+                toggle_debug_output();
+#endif
             }
             return false;
         case FIND:
@@ -646,7 +899,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_FUNCTION] = LAYOUT(
       BL_TOGG,  KC_F9 ,  KC_F10,  KC_F11,  KC_F12, UG_NEXT,                                     _______, _______, _______, _______, _______, _______,
       BL_STEP,  KC_F5 ,  KC_F6 ,  KC_F7 ,  KC_F8 , UG_PREV,                                     _______, KC_RSFT, KC_RCTL, KC_LALT, KC_RGUI, _______,
-      _______,  KC_F1 ,  KC_F2 ,  KC_F3 ,  KC_F4 , _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
+      DBG_OUT,  KC_F1 ,  KC_F2 ,  KC_F3 ,  KC_F4 , _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
                                  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
 
     ),
