@@ -265,6 +265,23 @@ static uint16_t sticky_tab_timer     = 0;
 
 #define STICKY_TAB_TIMEOUT 1000 // 1 second timeout
 
+bool get_permissive_hold(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case LSFT_T(KC_T):
+        case SFT_T(KC_N):
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool get_chordal_hold(uint16_t tap_hold_keycode, keyrecord_t *tap_hold_record, uint16_t other_keycode, keyrecord_t *other_record) {
+    if (IS_QK_LAYER_TAP(tap_hold_keycode)) {
+        return true;
+    }
+    return get_chordal_hold_default(tap_hold_record, other_record);
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     static uint16_t my_hash_timer;
     switch (keycode) {
@@ -552,8 +569,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                        `----------------------------------'                                       `----------------------------------
  */
     [_COLEMAK_DH] = LAYOUT(
-    REPLACE  , KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                                           KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_MINS, KC_BSPC,
-     FIND    , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   LSFT_T(KC_T) ,   KC_G ,                                               KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , KC_MINS,
+    REPLACE  , KC_Q ,  KC_W   ,  KC_F   ,   KC_P ,   KC_B ,                                                                                           KC_J  ,   KC_L ,   KC_U ,   KC_Y ,KC_MINS, KC_DEL,
+     FIND   , KC_A ,  LALT_T(KC_R)   ,  CTL_T(KC_S)   ,   LSFT_T(KC_T) ,   KC_G ,                                               KC_M  ,   SFT_T(KC_N) ,   CTL_T(KC_E) ,   LALT_T(KC_I) ,  KC_O , KC_MINS,
      OS_SWAP , KC_Z ,  KC_X   ,  KC_C   ,   KC_D ,   KC_V , CW_TOGG, KC_CAPS,                                                 FKEYS  ,     KC_RBRC, KC_K  ,   KC_H , DOT_DASH, KC_DOT ,KC_SLSH, CTL_QUOT,
                           TO(_GAME) , LT(_FUNCTION, KC_ESCAPE), LT(_SELECT, KC_SPACE) , LT(_NAV, KC_TAB),  STAB_NEXT           ,KC_RALT , LT(_SELECT, KC_ENT)    , LT(_SYM, KC_BSPC), KC_RGUI, TO(_LOL)
     ), 
