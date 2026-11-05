@@ -26,7 +26,7 @@ enum layers { _COLEMAK_DH = 0, _SYM, _NAV, _SELECT, _FUNCTION, _LOL, _GAME, _STS
 #define CTL_MINS MT(MOD_RCTL, KC_MINUS)
 #define ALT_ENT MT(MOD_LALT, KC_ENT)
 
-enum custom_keycodes { TEST = SAFE_RANGE, STAB_NEXT, STAB_PREV, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, GUI_SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE, GOTOLINE, GO_BACK, GO_FORWARD, GO_NEXT_ERROR, GO_PREV_ERROR, SCREENSHOT, FIND, REPLACE, OS_SWAP, DBG_OUT };
+enum custom_keycodes { TEST = SAFE_RANGE, STAB_NEXT, STAB_PREV, REDO, CTL_CLICK, UNDO, CUT, COPY, PASTE, SELECT_ALL, GUI_SAVE, PREV_W, NEXT_W, END_LINE, START_LINE, DOT_DASH, SLC_NEXT_WORD, SLC_PREV_WORD, SLC_END_LINE, SLC_START_LINE, GOTOLINE, GO_BACK, GO_FORWARD, GO_NEXT_ERROR, GO_PREV_ERROR, SCREENSHOT, FIND, REPLACE, OS_SWAP, GAME_OF_LIFE };
 
 typedef struct {
     bool swap_ctl_gui;
@@ -216,6 +216,10 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
 #    define OS_ICON_X (LCD_WIDTH - OS_ICON_SIZE - 5)
 static uint16_t os_icon_y = 0;
 #    define OS_ICON_Y os_icon_y
+
+static bool game_on    = false;
+static bool ui_dirty   = false;
+static bool icon_dirty = true;
 #    define HSV_WINDOWS_BLUE 147, 255, 255
 
 static void draw_windows_icon(void) {
@@ -242,20 +246,23 @@ static void draw_apple_icon(void) {
 }
 
 bool display_module_housekeeping_task_user(bool second_display) {
-    static os_variant_t drawn_os    = OS_UNSURE;
-    static bool         first_paint = true;
+    static os_variant_t drawn_os = OS_UNSURE;
+
+    if (second_display || game_on || ui_dirty) {
+        return true;
+    }
 
     const os_variant_t shown_os = current_os != OS_UNSURE ? current_os : detected_host_os();
 
-    if (!second_display && (first_paint || drawn_os != shown_os)) {
+    if (icon_dirty || drawn_os != shown_os) {
         qp_rect(lcd_surface, OS_ICON_X, OS_ICON_Y, OS_ICON_X + OS_ICON_SIZE - 1, OS_ICON_Y + OS_ICON_SIZE - 1, HSV_BLACK, true);
         if (shown_os == OS_WINDOWS) {
             draw_windows_icon();
         } else if (shown_os == OS_MACOS) {
             draw_apple_icon();
         }
-        drawn_os    = shown_os;
-        first_paint = false;
+        drawn_os   = shown_os;
+        icon_dirty = false;
     }
     return true;
 }
@@ -263,12 +270,17 @@ bool display_module_housekeeping_task_user(bool second_display) {
 #    include "hlc_tft_display/graphics/fonts/Retron2000-27.qff.h"
 #    include "hlc_tft_display/graphics/fonts/Retron2000-underline-27.qff.h"
 #    include "graphics/din40.qff.h"
+#    include "graphics/din54.qff.h"
+
+extern int color_value;
+uint32_t   get_random_32bit(void);
 
 #    define HSV_MODS 145, 150, 255
 
 static painter_font_handle_t font           = NULL;
 static painter_font_handle_t font_underline = NULL;
 static painter_font_handle_t font_layer     = NULL;
+static painter_font_handle_t font_layer_big = NULL;
 static uint16_t              layer_y        = 0;
 static uint16_t              caps_y         = 0;
 
@@ -276,7 +288,8 @@ bool module_post_init_user(void) {
     font           = qp_load_font_mem(font_Retron2000_27);
     font_underline = qp_load_font_mem(font_Retron2000_underline_27);
     font_layer     = qp_load_font_mem(font_din40);
-    layer_y        = LCD_HEIGHT - font_layer->line_height - 5;
+    font_layer_big = qp_load_font_mem(font_din54);
+    layer_y        = LCD_HEIGHT - font_layer_big->line_height - 5;
     caps_y         = layer_y - font->line_height - 6;
     os_icon_y      = layer_y - OS_ICON_SIZE - 5;
     return true;
@@ -299,13 +312,14 @@ static const key_label_t key_labels[] = {
 static char    output_key[12] = "";
 static uint8_t output_mods    = 0;
 static bool    output_dirty   = true;
-static bool    debug_output   = false;
+static bool    game_started   = false;
 
-static void toggle_debug_output(void) {
-    debug_output  = !debug_output;
-    output_key[0] = '\0';
-    output_mods   = 0;
-    output_dirty  = true;
+static void toggle_game(void) {
+    game_on      = !game_on;
+    game_started = false;
+    ui_dirty     = true;
+    icon_dirty   = true;
+    output_dirty = true;
 }
 
 static const char *find_label(uint16_t code) {
@@ -443,7 +457,7 @@ static uint16_t resolve_output(uint16_t keycode, keyrecord_t *record, uint8_t *m
 }
 
 static void capture_output(uint16_t keycode, keyrecord_t *record) {
-    if (!debug_output || !record->event.pressed) {
+    if (!record->event.pressed) {
         return;
     }
     if (keycode == OS_SWAP) {
@@ -461,34 +475,76 @@ static void capture_output(uint16_t keycode, keyrecord_t *record) {
 
 static const char *const layer_names[] = {"BASE", "SYM", "NAV", "SELECT", "FUNCTION", "LOL", "GAME", "STS"};
 
-static const uint8_t layer_colors[][3] = {
-    {HSV_LAYER_0}, {HSV_LAYER_1}, {HSV_LAYER_2}, {HSV_LAYER_3}, {HSV_LAYER_4}, {HSV_LAYER_5}, {HSV_LAYER_6}, {HSV_LAYER_7},
-};
+static const uint8_t layer_hues[] = {145, 20, 85, 0, 195, 40, 120, 225};
 
 static void clear_line(uint16_t y, uint16_t height) {
     qp_rect(lcd_surface, 0, y, LCD_WIDTH - 1, y + height, HSV_BLACK, true);
 }
 
+static void draw_layer_name(uint8_t layer) {
+    const char                  *name = layer_names[layer];
+    const painter_font_handle_t  face = qp_textwidth(font_layer_big, name) <= LCD_WIDTH - 10 ? font_layer_big : font_layer;
+    const uint16_t               y    = layer_y + font_layer_big->line_height - face->line_height;
+    uint16_t                     x    = 5;
+
+    clear_line(layer_y, font_layer_big->line_height);
+    for (size_t i = 0; name[i] != '\0'; i++) {
+        const char glyph[2] = {name[i], '\0'};
+        qp_drawtext_recolor(lcd_surface, x, y, face, glyph, (uint8_t)(layer_hues[layer] + i * 20), 255, 255, HSV_BLACK);
+        x += qp_textwidth(face, glyph);
+    }
+}
+
+static void run_game(void) {
+    static uint32_t last_draw         = 0;
+    static uint32_t previous_activity = 0;
+
+    if (!game_started) {
+        srand(get_random_32bit());
+        init_grid();
+        color_value = rand() % 8;
+        qp_rect(lcd_surface, 0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1, HSV_BLACK, true);
+        previous_activity = last_matrix_activity_time();
+        game_started      = true;
+    }
+
+    if (timer_elapsed32(last_draw) >= 100) {
+        draw_grid();
+        update_grid();
+        if (previous_activity != last_matrix_activity_time()) {
+            color_value = rand() % 8;
+            add_cell_cluster();
+            previous_activity = last_matrix_activity_time();
+        }
+        last_draw = timer_read32();
+    }
+}
+
 void update_display(void) {
     static uint8_t drawn_layer = UINT8_MAX;
     static int8_t  drawn_caps  = -1;
-    static bool    drawn_debug = false;
 
     if (font == NULL) {
         return;
+    }
+
+    if (game_on) {
+        run_game();
+        return;
+    }
+
+    if (ui_dirty) {
+        qp_rect(lcd_surface, 0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1, HSV_BLACK, true);
+        drawn_layer = UINT8_MAX;
+        drawn_caps  = -1;
+        ui_dirty    = false;
     }
 
     const uint16_t height = font->line_height;
     const uint16_t mods_y = 5;
     const uint16_t key_y  = mods_y + height + 4;
 
-    if (!debug_output && drawn_debug) {
-        clear_line(mods_y, height);
-        clear_line(key_y, height);
-    }
-    drawn_debug = debug_output;
-
-    if (debug_output && output_dirty) {
+    if (output_dirty) {
         char mods_text[24];
         build_mods_text(output_mods, true, mods_text, sizeof(mods_text));
         if (qp_textwidth(font, mods_text) > LCD_WIDTH - 10) {
@@ -503,8 +559,7 @@ void update_display(void) {
 
     const uint8_t layer = get_highest_layer(layer_state | default_layer_state);
     if (layer != drawn_layer && layer < ARRAY_SIZE(layer_names)) {
-        clear_line(layer_y, font_layer->line_height);
-        qp_drawtext_recolor(lcd_surface, 5, layer_y, font_layer, layer_names[layer], layer_colors[layer][0], layer_colors[layer][1], layer_colors[layer][2], HSV_BLACK);
+        draw_layer_name(layer);
         drawn_layer = layer;
     }
 
@@ -702,10 +757,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 apply_os_settings(current_os == OS_MACOS ? OS_WINDOWS : OS_MACOS);
             }
             return false;
-        case DBG_OUT:
+        case GAME_OF_LIFE:
             if (record->event.pressed) {
 #ifdef HLC_TFT_DISPLAY
-                toggle_debug_output();
+                toggle_game();
 #endif
             }
             return false;
@@ -926,7 +981,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_FUNCTION] = LAYOUT(
       BL_TOGG,  KC_F9 ,  KC_F10,  KC_F11,  KC_F12, UG_NEXT,                                     _______, _______, _______, _______, _______, _______,
       BL_STEP,  KC_F5 ,  KC_F6 ,  KC_F7 ,  KC_F8 , UG_PREV,                                     _______, KC_RSFT, KC_RCTL, KC_LALT, KC_RGUI, _______,
-      DBG_OUT,  KC_F1 ,  KC_F2 ,  KC_F3 ,  KC_F4 , _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
+      GAME_OF_LIFE,  KC_F1 ,  KC_F2 ,  KC_F3 ,  KC_F4 , _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
                                  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
 
     ),

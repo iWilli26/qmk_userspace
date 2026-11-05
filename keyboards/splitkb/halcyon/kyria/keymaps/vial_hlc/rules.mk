@@ -11,4 +11,5 @@ MOUSEKEY_ENABLE = yes
 
 ifdef HLC_TFT_DISPLAY
     SRC += graphics/din40.qff.c
+    SRC += graphics/din54.qff.c
 endif
